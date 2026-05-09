@@ -261,3 +261,85 @@ function wCL(num){
   if(n.length===11) n='55'+n;
   window.open('https://wa.me/'+n,'_blank');
 }
+// ── PRECIFICAÇÃO ──────────────────────────────────────────────────────────────
+// Adicione estas funções no final do app-part1.js, antes do último fechamento
+
+function calcPC(){
+  var hotel    = pV(document.getElementById('pc-hotel').value);
+  var mhotel   = parseInt(document.getElementById('pc-hotel-pct').value)/100;
+  var voo      = pV(document.getElementById('pc-voo').value);
+  var mvoo     = parseInt(document.getElementById('pc-voo-pct').value)/100;
+  var embarque = pV(document.getElementById('pc-embarque').value); // sem margem
+  var transfer = pV(document.getElementById('pc-transfer').value);
+  var mtransfer= parseInt(document.getElementById('pc-transfer-pct').value)/100;
+  var carro    = pV(document.getElementById('pc-carro').value);
+  var mcarro   = parseInt(document.getElementById('pc-carro-pct').value)/100;
+  var passeios = pV(document.getElementById('pc-passeios').value);
+  var mpasseios= parseInt(document.getElementById('pc-passeios-pct').value)/100;
+  var seguro   = pV(document.getElementById('pc-seguro').value);
+  var mseguro  = parseInt(document.getElementById('pc-seguro-pct').value)/100;
+
+  var custo = hotel + voo + embarque + transfer + carro + passeios + seguro;
+
+  if(custo === 0){
+    document.getElementById('pc-resultado').innerHTML='<div class="empty"><span>💼</span>Preencha os valores acima</div>';
+    return;
+  }
+
+  // Comissão por item
+  var comHotel    = hotel    * mhotel;
+  var comVoo      = voo      * mvoo;
+  var comTransfer = transfer * mtransfer;
+  var comCarro    = carro    * mcarro;
+  var comPasseios = passeios * mpasseios;
+  var comSeguro   = seguro   * mseguro;
+  var comTotal    = comHotel + comVoo + comTransfer + comCarro + comPasseios + comSeguro;
+
+  // Preço final para o cliente
+  var precoFinal = custo + comTotal;
+
+  var el = document.getElementById('pc-resultado');
+  el.innerHTML =
+    // CARD PRINCIPAL
+    '<div style="background:linear-gradient(135deg,#152347,#1c2e58);border:1px solid rgba(232,184,75,.3);border-radius:14px;padding:16px;margin-bottom:10px;">' +
+      '<div style="font-size:10px;font-weight:700;color:#8a9bb5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">💵 Preço final para o cliente</div>' +
+      '<div style="font-size:38px;font-weight:800;color:#e8b84b;letter-spacing:-1px;line-height:1;">'+fBRL(precoFinal)+'</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:12px;">' +
+        '<div><div style="font-size:9px;color:#8a9bb5;text-transform:uppercase;letter-spacing:.8px;">Seu custo</div><div style="font-size:14px;font-weight:700;color:#f0f0f0;">'+fBRL(custo)+'</div></div>' +
+        '<div style="text-align:right"><div style="font-size:9px;color:#8a9bb5;text-transform:uppercase;letter-spacing:.8px;">Sua comissão</div><div style="font-size:14px;font-weight:700;color:#4af0a0;">'+fBRL(comTotal)+'</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // DETALHAMENTO
+    '<div style="background:#152347;border:1px solid #1e3060;border-radius:12px;padding:12px 14px;margin-bottom:8px;">' +
+      '<div style="font-size:10px;font-weight:700;color:#8a9bb5;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Detalhamento</div>' +
+      (hotel    ? '<div class="det-row"><span class="det-k">🏨 Hotel</span><span class="det-v">'+fBRL(hotel)+(mhotel>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comHotel)+')</span>':'')+'</span></div>' : '') +
+      (voo      ? '<div class="det-row"><span class="det-k">✈️ Passagem</span><span class="det-v">'+fBRL(voo)+(mvoo>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comVoo)+')</span>':'')+'</span></div>' : '') +
+      (embarque ? '<div class="det-row"><span class="det-k">🛫 Tx. Embarque</span><span class="det-v">'+fBRL(embarque)+' <span style="color:#8a9bb5;font-size:10px;">(sem margem)</span></span></div>' : '') +
+      (transfer ? '<div class="det-row"><span class="det-k">🚐 Transfer</span><span class="det-v">'+fBRL(transfer)+(mtransfer>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comTransfer)+')</span>':'')+'</span></div>' : '') +
+      (carro    ? '<div class="det-row"><span class="det-k">🚗 Aluguel carro</span><span class="det-v">'+fBRL(carro)+(mcarro>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comCarro)+')</span>':'')+'</span></div>' : '') +
+      (passeios ? '<div class="det-row"><span class="det-k">🎡 Passeios</span><span class="det-v">'+fBRL(passeios)+(mpasseios>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comPasseios)+')</span>':'')+'</span></div>' : '') +
+      (seguro   ? '<div class="det-row"><span class="det-k">🛡️ Seguro</span><span class="det-v">'+fBRL(seguro)+(mseguro>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comSeguro)+')</span>':'')+'</span></div>' : '') +
+      '<div class="det-row" style="border-top:1px solid #1e3060;padding-top:8px;margin-top:4px;"><span class="det-k" style="font-weight:700;color:#f0f0f0;">Total cliente</span><span class="det-v" style="color:#e8b84b;font-size:14px;">'+fBRL(precoFinal)+'</span></div>' +
+    '</div>' +
+
+    // MARGEM %
+    '<div style="background:rgba(74,240,160,.07);border:1px solid rgba(74,240,160,.2);border-radius:10px;padding:10px 13px;text-align:center;font-size:12px;color:#4af0a0;font-weight:700;">' +
+      '📈 Margem sobre o custo: '+(custo>0?(comTotal/custo*100).toFixed(1):0)+'% &nbsp;|&nbsp; Comissão: '+fBRL(comTotal) +
+    '</div>';
+}
+
+function limparPC(){
+  ['pc-hotel','pc-voo','pc-embarque','pc-transfer','pc-carro','pc-passeios','pc-seguro'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var defaults={
+    'pc-hotel-pct':10,'pc-voo-pct':5,'pc-transfer-pct':0,
+    'pc-carro-pct':0,'pc-passeios-pct':0,'pc-seguro-pct':15
+  };
+  Object.keys(defaults).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.value=defaults[id];document.getElementById(id+'-lbl').textContent=defaults[id];}
+  });
+  document.getElementById('pc-resultado').innerHTML='<div class="empty"><span>💼</span>Preencha os valores acima</div>';
+}
