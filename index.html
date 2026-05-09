@@ -476,40 +476,62 @@
     <button class="btn-sec" onclick="fOv('ov-cl')">Cancelar</button>
   </div>
 </div>
-
 <!-- ═══ MODAL VENDA ═══ -->
 <div class="overlay" id="ov-fin-v" onclick="fOv('ov-fin-v',event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title" id="fin-v-title">Registrar Venda</div>
     <input type="hidden" id="fin-v-id" />
     <div class="mfield"><label>Cliente / Destino</label><input id="fin-v-nome" type="text" placeholder="Ex: Ana — Fortaleza" /></div>
-    <div class="mgrid2">
-      <div class="mfield"><label>Hotel (R$)</label><input id="fin-v-hotel" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
-      <div class="mfield"><label>Margem hotel</label>
-        <select id="fin-v-mh" onchange="calcComFIN()"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option></select>
+
+    <!-- TIPO DE VENDA -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button class="tab on" id="fin-tipo-avulso" onclick="setTipoVenda('avulso')" style="flex:1;font-size:11px;">✈️ Venda Avulsa</button>
+      <button class="tab" id="fin-tipo-op" onclick="setTipoVenda('operadora')" style="flex:1;font-size:11px;">🏢 Operadora</button>
+    </div>
+
+    <!-- CAMPOS AVULSO -->
+    <div id="fin-campos-avulso">
+      <div style="background:rgba(96,180,255,.08);border:1px solid rgba(96,180,255,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:#60b4ff;margin-bottom:8px;">
+        ℹ️ A comissão do voo incide apenas sobre o valor da passagem — não sobre a taxa de embarque.
       </div>
-    </div>
-    <div class="mgrid2">
-      <div class="mfield"><label>Voo (R$)</label><input id="fin-v-voo" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
-      <div class="mfield"><label>Margem voo</label>
-        <select id="fin-v-mv" onchange="calcComFIN()"><option value="0">0%</option><option value="5" selected>5%</option><option value="10">10%</option></select>
+      <div class="mgrid2">
+        <div class="mfield"><label>Hotel (R$)</label><input id="fin-v-hotel" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+        <div class="mfield"><label>Margem hotel</label>
+          <select id="fin-v-mh" onchange="calcComFIN()"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option></select>
+        </div>
       </div>
-    </div>
-    <div class="mgrid2">
-      <div class="mfield"><label>Outros (R$)</label><input id="fin-v-out" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
-      <div class="mfield"><label>Margem outros</label>
-        <select id="fin-v-mo" onchange="calcComFIN()"><option value="0" selected>0%</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option></select>
+      <div class="mgrid2">
+        <div class="mfield"><label>Passagem aérea (R$)</label><input id="fin-v-voo" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+        <div class="mfield"><label>Margem passagem</label>
+          <select id="fin-v-mv" onchange="calcComFIN()"><option value="0">0%</option><option value="5" selected>5%</option><option value="10">10%</option></select>
+        </div>
       </div>
+      <div class="mfield"><label>Taxa de embarque (R$) — sem comissão</label><input id="fin-v-embarque" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+      <div class="mgrid2">
+        <div class="mfield"><label>Outros (R$)</label><input id="fin-v-out" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+        <div class="mfield"><label>Margem outros</label>
+          <select id="fin-v-mo" onchange="calcComFIN()"><option value="0" selected>0%</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option></select>
+        </div>
+      </div>
+      <div class="mfield"><label>Seguro (R$) — margem fixa 15%</label><input id="fin-v-seg" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
     </div>
-    <div class="mgrid2">
-      <div class="mfield"><label>Seguro (R$)</label><input id="fin-v-seg" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
-      <div class="mfield"><label>Data fechamento</label><input id="fin-v-data" type="date" /></div>
+
+    <!-- CAMPOS OPERADORA -->
+    <div id="fin-campos-op" style="display:none;">
+      <div style="background:rgba(74,240,160,.08);border:1px solid rgba(74,240,160,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:#4af0a0;margin-bottom:8px;">
+        ℹ️ Pacote de operadora: informe o valor total do pacote e sua comissão já embutida.
+      </div>
+      <div class="mfield"><label>Valor total do pacote (R$)</label><input id="fin-v-total-op" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+      <div class="mfield"><label>Sua comissão (R$)</label><input id="fin-v-com-op" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
     </div>
+
+    <div class="mfield"><label>Data fechamento</label><input id="fin-v-data" type="date" /></div>
     <div class="preview-box" id="fin-v-prev">Preencha os valores</div>
     <button class="btn-gold" id="fin-v-btn" onclick="salvarVendaFIN()">💾 Salvar Venda</button>
     <button class="btn-sec" onclick="fOv('ov-fin-v')">Cancelar</button>
   </div>
 </div>
+
 
 <!-- ═══ MODAL DESPESA ═══ -->
 <div class="overlay" id="ov-fin-d" onclick="fOv('ov-fin-d',event)">
