@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotação de Viagem — PrimeWay Viagens</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --navy: #0D1B2A;
+    --navy-mid: #152336;
+    --navy-light: #1E3048;
+    --white: #F5F0E8;
+    --white-dim: rgba(245,240,232,0.07);
+    --white-mid: rgba(245,240,232,0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 100%, rgba(201,168,76,0.06) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 5rem;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeDown 0.8s ease both;
+  }
+  .header-badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 0.5px solid var(--gold);
+    border-radius: 20px;
+    padding: 4px 16px;
+    margin-bottom: 1.25rem;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.75rem;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--white-mid);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+  .progress-step {
+    flex: 1;
+    height: 2px;
+    background: var(--white-dim);
+    border-radius: 2px;
+    transition: background 0.4s;
+  }
+  .progress-step.done { background: var(--gold); }
+  .progress-step.active { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .progress-label {
+    font-size: 11px;
+    color: var(--white-mid);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+  .section.active { display: block; }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--gold-dim);
+  }
+
+  /* FIELD */
+  .field { margin-bottom: 1.5rem; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--white-mid);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .field label .req { color: var(--gold); margin-left: 3px; }
+
+  .field input[type="text"],
+  .field input[type="date"],
+  .field input[type="email"],
+  .field textarea {
+    width: 100%;
+    background: var(--white-dim);
+    border: 0.5px solid rgba(201,168,76,0.25);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.3s, background 0.3s;
+    -webkit-appearance: none;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: rgba(245,240,232,0.3); }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+  .field input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8) sepia(1) hue-rotate(5deg); }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width: 480px) { .row { grid-template-columns: 1fr; } }
+
+  /* RADIO / CHECKBOX OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options.inline { flex-direction: row; flex-wrap: wrap; }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white-dim);
+    border: 0.5px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    user-select: none;
+  }
+  .opt:hover { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.08); }
+  .opt.selected {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.13);
+    color: var(--white);
+  }
+  .options.inline .opt { flex: 1; min-width: 80px; justify-content: center; font-size: 13px; }
+
+  .opt-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(201,168,76,0.4);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s;
+  }
+  .opt.selected .opt-dot {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+  .opt-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--navy);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .opt.selected .opt-dot::after { opacity: 1; }
+
+  .opt-check {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(201,168,76,0.4);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s;
+    font-size: 10px;
+  }
+  .opt.selected .opt-check {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--navy);
+  }
+
+  .opt-text { font-size: 13px; color: var(--white); line-height: 1.4; }
+
+  /* BUTTONS */
+  .btn-row { display: flex; gap: 10px; margin-top: 2rem; }
+  .btn-back {
+    padding: 13px 24px;
+    background: transparent;
+    border: 0.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    color: var(--white-mid);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-back:hover { border-color: var(--gold); color: var(--white); }
+  .btn-next {
+    flex: 1;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    border: none;
+    border-radius: 8px;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-next::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+  .btn-next:hover::after { background: rgba(255,255,255,0.1); }
+  .btn-next:active { transform: scale(0.98); }
+
+  /* SUCCESS */
+  .success {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+    animation: fadeUp 0.7s ease both;
+  }
+  .success.show { display: block; }
+  .success-icon {
+    font-size: 48px;
+    margin-bottom: 1.5rem;
+  }
+  .success h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--gold-light);
+    margin-bottom: 1rem;
+  }
+  .success p { font-size: 14px; color: var(--white-mid); line-height: 1.7; }
+
+  /* ERROR */
+  .error-msg {
+    font-size: 12px;
+    color: #f87171;
+    margin-top: 6px;
+    display: none;
+  }
+  .field.invalid .error-msg { display: block; }
+  .field.invalid input,
+  .field.invalid .options { outline: 0.5px solid rgba(248,113,113,0.5); border-radius: 8px; }
+
+  /* LOADING */
+  .btn-next.loading { opacity: 0.7; pointer-events: none; }
+  .btn-next.loading::before { content: '⟳ '; animation: spin 0.8s linear infinite; display: inline-block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">✈ PrimeWay Viagens</div>
+    <h1>Sua próxima <em>aventura</em><br>começa aqui</h1>
+    <p>Preencha as informações abaixo e nossa equipe prepara a proposta perfeita para você em até 24h.</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-step active" id="ps1"></div>
+    <div class="progress-step" id="ps2"></div>
+    <div class="progress-step" id="ps3"></div>
+    <div class="progress-step" id="ps4"></div>
+    <div class="progress-step" id="ps5"></div>
+    <div class="progress-step" id="ps6"></div>
+    <div class="progress-step" id="ps7"></div>
+    <span class="progress-label" id="progress-text">1 / 7</span>
+  </div>
+
+  <!-- SEÇÃO 1: DADOS PESSOAIS -->
+  <div class="section active" id="s1">
+    <div class="section-label">Dados do solicitante</div>
+    <div class="field" id="f-nome">
+      <label>Nome completo <span class="req">*</span></label>
+      <input type="text" id="nome" placeholder="Seu nome completo">
+      <div class="error-msg">Por favor, informe seu nome.</div>
+    </div>
+    <div class="field" id="f-wpp">
+      <label>WhatsApp (com DDD) <span class="req">*</span></label>
+      <input type="text" id="wpp" placeholder="(11) 99999-9999">
+      <div class="error-msg">Por favor, informe seu WhatsApp.</div>
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="email" placeholder="seuemail@email.com">
+    </div>
+    <div class="btn-row"><button class="btn-next" onclick="next(1)">Próximo →</button></div>
+  </div>
+
+  <!-- SEÇÃO 2: GRUPO -->
+  <div class="section" id="s2">
+    <div class="section-label">Composição do grupo</div>
+    <div class="field" id="f-adultos">
+      <label>Quantos adultos vão viajar? <span class="req">*</span></label>
+      <div class="options inline" data-name="adultos" data-type="radio">
+        <div class="opt" data-value="1"><div class="opt-dot"></div><span class="opt-text">1</span></div>
+        <div class="opt" data-value="2"><div class="opt-dot"></div><span class="opt-text">2</span></div>
+        <div class="opt" data-value="3"><div class="opt-dot"></div><span class="opt-text">3</span></div>
+        <div class="opt" data-value="4"><div class="opt-dot"></div><span class="opt-text">4</span></div>
+        <div class="opt" data-value="5+"><div class="opt-dot"></div><span class="opt-text">5+</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-criancas">
+      <label>Haverá crianças na viagem? <span class="req">*</span></label>
+      <div class="options" data-name="criancas" data-type="radio">
+        <div class="opt" data-value="Não"><div class="opt-dot"></div><span class="opt-text">Não</span></div>
+        <div class="opt" data-value="Sim — 1 criança"><div class="opt-dot"></div><span class="opt-text">Sim — 1 criança</span></div>
+        <div class="opt" data-value="Sim — 2 crianças"><div class="opt-dot"></div><span class="opt-text">Sim — 2 crianças</span></div>
+        <div class="opt" data-value="Sim — 3 ou mais"><div class="opt-dot"></div><span class="opt-text">Sim — 3 ou mais</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field">
+      <label>Idades das crianças (se houver)</label>
+      <input type="text" id="idades" placeholder="Ex: 4 e 7 anos">
+    </div>
+    <div class="field">
+      <label>Passageiro com necessidade especial?</label>
+      <div class="options" data-name="necessidade" data-type="radio">
+        <div class="opt" data-value="Não"><div class="opt-dot"></div><span class="opt-text">Não</span></div>
+        <div class="opt" data-value="Sim — mobilidade reduzida"><div class="opt-dot"></div><span class="opt-text">Sim — mobilidade reduzida</span></div>
+        <div class="opt" data-value="Sim — outro"><div class="opt-dot"></div><span class="opt-text">Sim — outro (descreva no final)</span></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(2)">← Voltar</button>
+      <button class="btn-next" onclick="next(2)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 3: DESTINO E DATAS -->
+  <div class="section" id="s3">
+    <div class="section-label">Destino e datas</div>
+    <div class="field" id="f-destino">
+      <label>Destino desejado <span class="req">*</span></label>
+      <input type="text" id="destino" placeholder="Ex: Gramado, Maldivas, Lisboa...">
+      <div class="error-msg">Informe o destino desejado.</div>
+    </div>
+    <div class="field" id="f-origem">
+      <label>Cidade de embarque <span class="req">*</span></label>
+      <input type="text" id="origem" placeholder="Ex: São Paulo (GRU), Rio (GIG)...">
+      <div class="error-msg">Informe a cidade de embarque.</div>
+    </div>
+    <div class="row">
+      <div class="field" id="f-ida">
+        <label>Data de ida <span class="req">*</span></label>
+        <input type="date" id="ida">
+        <div class="error-msg">Informe a data de ida.</div>
+      </div>
+      <div class="field" id="f-volta">
+        <label>Data de volta <span class="req">*</span></label>
+        <input type="date" id="volta">
+        <div class="error-msg">Informe a data de volta.</div>
+      </div>
+    </div>
+    <div class="field" id="f-flex">
+      <label>Flexibilidade de datas? <span class="req">*</span></label>
+      <div class="options" data-name="flexdatas" data-type="radio">
+        <div class="opt" data-value="Não, datas fixas"><div class="opt-dot"></div><span class="opt-text">Não, datas fixas</span></div>
+        <div class="opt" data-value="Sim, ± 2 dias"><div class="opt-dot"></div><span class="opt-text">Sim, ± 2 dias</span></div>
+        <div class="opt" data-value="Sim, ± 1 semana"><div class="opt-dot"></div><span class="opt-text">Sim, ± 1 semana</span></div>
+        <div class="opt" data-value="Bastante flexível"><div class="opt-dot"></div><span class="opt-text">Bastante flexível</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(3)">← Voltar</button>
+      <button class="btn-next" onclick="next(3)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 4: VOO -->
+  <div class="section" id="s4">
+    <div class="section-label">Preferências de voo</div>
+    <div class="field" id="f-tipovoo">
+      <label>Tipo de voo preferido <span class="req">*</span></label>
+      <div class="options" data-name="tipovoo" data-type="radio">
+        <div class="opt" data-value="Prefiro voo direto"><div class="opt-dot"></div><span class="opt-text">Prefiro voo direto</span></div>
+        <div class="opt" data-value="Aceito conexões"><div class="opt-dot"></div><span class="opt-text">Aceito conexões</span></div>
+        <div class="opt" data-value="Sem preferência"><div class="opt-dot"></div><span class="opt-text">Sem preferência</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field">
+      <label>Preferência de companhia aérea</label>
+      <div class="options" data-name="cia" data-type="radio">
+        <div class="opt" data-value="Sem preferência"><div class="opt-dot"></div><span class="opt-text">Sem preferência</span></div>
+        <div class="opt" data-value="LATAM"><div class="opt-dot"></div><span class="opt-text">LATAM</span></div>
+        <div class="opt" data-value="Gol"><div class="opt-dot"></div><span class="opt-text">Gol</span></div>
+        <div class="opt" data-value="Azul"><div class="opt-dot"></div><span class="opt-text">Azul</span></div>
+        <div class="opt" data-value="Outra"><div class="opt-dot"></div><span class="opt-text">Outra</span></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(4)">← Voltar</button>
+      <button class="btn-next" onclick="next(4)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 5: HOSPEDAGEM -->
+  <div class="section" id="s5">
+    <div class="section-label">Hospedagem</div>
+    <div class="field" id="f-tipohosp">
+      <label>Tipo de hospedagem <span class="req">*</span></label>
+      <div class="options" data-name="tipohosp" data-type="radio">
+        <div class="opt" data-value="Hotel"><div class="opt-dot"></div><span class="opt-text">Hotel</span></div>
+        <div class="opt" data-value="Pousada"><div class="opt-dot"></div><span class="opt-text">Pousada</span></div>
+        <div class="opt" data-value="Resort"><div class="opt-dot"></div><span class="opt-text">Resort</span></div>
+        <div class="opt" data-value="Apart-hotel"><div class="opt-dot"></div><span class="opt-text">Apart-hotel</span></div>
+        <div class="opt" data-value="Sem preferência"><div class="opt-dot"></div><span class="opt-text">Sem preferência</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-cat">
+      <label>Categoria <span class="req">*</span></label>
+      <div class="options inline" data-name="categoria" data-type="radio">
+        <div class="opt" data-value="Econômico"><div class="opt-dot"></div><span class="opt-text">Econômico</span></div>
+        <div class="opt" data-value="Padrão"><div class="opt-dot"></div><span class="opt-text">Padrão</span></div>
+        <div class="opt" data-value="Superior"><div class="opt-dot"></div><span class="opt-text">Superior</span></div>
+        <div class="opt" data-value="Luxo"><div class="opt-dot"></div><span class="opt-text">Luxo</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-regime">
+      <label>Regime alimentar <span class="req">*</span></label>
+      <div class="options" data-name="regime" data-type="radio">
+        <div class="opt" data-value="Só café da manhã"><div class="opt-dot"></div><span class="opt-text">Só café da manhã</span></div>
+        <div class="opt" data-value="Meia pensão"><div class="opt-dot"></div><span class="opt-text">Meia pensão</span></div>
+        <div class="opt" data-value="All inclusive"><div class="opt-dot"></div><span class="opt-text">All inclusive</span></div>
+        <div class="opt" data-value="Sem refeição incluída"><div class="opt-dot"></div><span class="opt-text">Sem refeição incluída</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-quarto">
+      <label>Tipo de quarto <span class="req">*</span></label>
+      <div class="options" data-name="quarto" data-type="radio">
+        <div class="opt" data-value="Casal (double)"><div class="opt-dot"></div><span class="opt-text">Casal (double)</span></div>
+        <div class="opt" data-value="Twin (duas camas)"><div class="opt-dot"></div><span class="opt-text">Twin (duas camas)</span></div>
+        <div class="opt" data-value="Familiar"><div class="opt-dot"></div><span class="opt-text">Familiar</span></div>
+        <div class="opt" data-value="Suíte"><div class="opt-dot"></div><span class="opt-text">Suíte</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(5)">← Voltar</button>
+      <button class="btn-next" onclick="next(5)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 6: ESCOPO E ORÇAMENTO -->
+  <div class="section" id="s6">
+    <div class="section-label">Escopo e orçamento</div>
+    <div class="field" id="f-escopo">
+      <label>O que deseja cotar? <span class="req">*</span></label>
+      <div class="options" data-name="escopo" data-type="radio">
+        <div class="opt" data-value="Pacote completo (aéreo + hotel + transfer + passeios)"><div class="opt-dot"></div><span class="opt-text">Pacote completo (aéreo + hotel + transfer + passeios)</span></div>
+        <div class="opt" data-value="Aéreo + hospedagem"><div class="opt-dot"></div><span class="opt-text">Aéreo + hospedagem</span></div>
+        <div class="opt" data-value="Só hospedagem"><div class="opt-dot"></div><span class="opt-text">Só hospedagem</span></div>
+        <div class="opt" data-value="Só passagem aérea"><div class="opt-dot"></div><span class="opt-text">Só passagem aérea</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-transfer">
+      <label>Transfer aeroporto/hotel? <span class="req">*</span></label>
+      <div class="options" data-name="transfer" data-type="radio">
+        <div class="opt" data-value="Sim"><div class="opt-dot"></div><span class="opt-text">Sim</span></div>
+        <div class="opt" data-value="Não"><div class="opt-dot"></div><span class="opt-text">Não</span></div>
+        <div class="opt" data-value="Não sei ainda"><div class="opt-dot"></div><span class="opt-text">Não sei ainda</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field" id="f-seguro">
+      <label>Interesse em seguro viagem? <span class="req">*</span></label>
+      <div class="options" data-name="seguro" data-type="radio">
+        <div class="opt" data-value="Sim, quero incluir"><div class="opt-dot"></div><span class="opt-text">Sim, quero incluir</span></div>
+        <div class="opt" data-value="Não por enquanto"><div class="opt-dot"></div><span class="opt-text">Não por enquanto</span></div>
+        <div class="opt" data-value="Quero saber mais antes de decidir"><div class="opt-dot"></div><span class="opt-text">Quero saber mais antes de decidir</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field">
+      <label>Faixa de investimento</label>
+      <input type="text" id="orcamento" placeholder="Ex: R$ 5.000 por pessoa ou R$ 15.000 no total">
+    </div>
+    <div class="field" id="f-pgto">
+      <label>Forma de pagamento preferida <span class="req">*</span></label>
+      <div class="options" data-name="pagamento" data-type="radio">
+        <div class="opt" data-value="Cartão de crédito parcelado"><div class="opt-dot"></div><span class="opt-text">Cartão de crédito parcelado</span></div>
+        <div class="opt" data-value="Pix / À vista"><div class="opt-dot"></div><span class="opt-text">Pix / À vista</span></div>
+        <div class="opt" data-value="Boleto parcelado"><div class="opt-dot"></div><span class="opt-text">Boleto parcelado</span></div>
+        <div class="opt" data-value="Sem preferência"><div class="opt-dot"></div><span class="opt-text">Sem preferência</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(6)">← Voltar</button>
+      <button class="btn-next" onclick="next(6)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 7: FINALIZAÇÃO -->
+  <div class="section" id="s7">
+    <div class="section-label">Últimos detalhes</div>
+    <div class="field" id="f-motivo">
+      <label>Motivo da viagem <span class="req">*</span></label>
+      <div class="options" data-name="motivo" data-type="radio">
+        <div class="opt" data-value="Férias em família"><div class="opt-dot"></div><span class="opt-text">Férias em família</span></div>
+        <div class="opt" data-value="Lua de mel / Casal"><div class="opt-dot"></div><span class="opt-text">Lua de mel / Casal</span></div>
+        <div class="opt" data-value="Aniversário / Comemoração"><div class="opt-dot"></div><span class="opt-text">Aniversário / Comemoração</span></div>
+        <div class="opt" data-value="Grupo de amigos"><div class="opt-dot"></div><span class="opt-text">Grupo de amigos</span></div>
+        <div class="opt" data-value="Outro"><div class="opt-dot"></div><span class="opt-text">Outro</span></div>
+      </div>
+      <div class="error-msg">Selecione uma opção.</div>
+    </div>
+    <div class="field">
+      <label>Já visitou o destino antes?</label>
+      <div class="options" data-name="jafoi" data-type="radio">
+        <div class="opt" data-value="Não, será a primeira vez"><div class="opt-dot"></div><span class="opt-text">Não, será a primeira vez</span></div>
+        <div class="opt" data-value="Sim, já fui"><div class="opt-dot"></div><span class="opt-text">Sim, já fui</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Detalhes especiais ou pedidos</label>
+      <textarea id="detalhes" placeholder="Ex: lua de mel, quarto com vista, aniversário surpresa, passaporte vencido..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="back(7)">← Voltar</button>
+      <button class="btn-next" id="btn-submit" onclick="enviar()">Enviar cotação ✈</button>
+    </div>
+  </div>
+
+  <!-- SUCESSO -->
+  <div class="success" id="success">
+    <div class="success-icon">✈️</div>
+    <h2>Solicitação enviada!</h2>
+    <p>Obrigada pelo contato com a <strong>PrimeWay Viagens</strong>.<br>Nossa equipe retorna em até <strong>24 horas</strong> com sua proposta personalizada.</p>
+  </div>
+
+</div>
+
+<script>
+  // ── URL do Apps Script (substituir após criar o script) ──
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybW19vHrVS-lvXA1mH3pf07pQ8o0eodRFpiVkNYEdVqCPGW1dwSyf4kQAjlXkXgVVjJQ/exec';
+
+  let current = 1;
+  const total = 7;
+
+  // opções clicáveis
+  document.querySelectorAll('.options').forEach(group => {
+    const type = group.dataset.type;
+    group.querySelectorAll('.opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (type === 'radio') {
+          group.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        }
+        opt.classList.toggle('selected');
+        // limpa erro
+        const field = group.closest('.field');
+        if (field) field.classList.remove('invalid');
+      });
+    });
+  });
+
+  function getVal(name) {
+    const sel = document.querySelectorAll(`.options[data-name="${name}"] .opt.selected`);
+    return [...sel].map(o => o.dataset.value).join(', ');
+  }
+
+  function updateProgress(step) {
+    for (let i = 1; i <= total; i++) {
+      const el = document.getElementById('ps' + i);
+      if (i < step) { el.className = 'progress-step done'; }
+      else if (i === step) { el.className = 'progress-step active'; }
+      else { el.className = 'progress-step'; }
+    }
+    document.getElementById('progress-text').textContent = step + ' / ' + total;
+  }
+
+  function showSection(n) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('s' + n).classList.add('active');
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validate(step) {
+    let ok = true;
+
+    if (step === 1) {
+      const nome = document.getElementById('nome');
+      const wpp = document.getElementById('wpp');
+      const fn = document.getElementById('f-nome');
+      const fw = document.getElementById('f-wpp');
+      fn.classList.toggle('invalid', !nome.value.trim());
+      fw.classList.toggle('invalid', !wpp.value.trim());
+      if (!nome.value.trim() || !wpp.value.trim()) ok = false;
+    }
+    if (step === 2) {
+      if (!getVal('adultos')) { document.getElementById('f-adultos').classList.add('invalid'); ok = false; }
+      if (!getVal('criancas')) { document.getElementById('f-criancas').classList.add('invalid'); ok = false; }
+    }
+    if (step === 3) {
+      const d = document.getElementById('destino'); const fo = document.getElementById('f-destino');
+      const o = document.getElementById('origem'); const foo = document.getElementById('f-origem');
+      const i = document.getElementById('ida'); const fi = document.getElementById('f-ida');
+      const v = document.getElementById('volta'); const fv = document.getElementById('f-volta');
+      fo.classList.toggle('invalid', !d.value.trim());
+      foo.classList.toggle('invalid', !o.value.trim());
+      fi.classList.toggle('invalid', !i.value);
+      fv.classList.toggle('invalid', !v.value);
+      if (!getVal('flexdatas')) { document.getElementById('f-flex').classList.add('invalid'); ok = false; }
+      if (!d.value.trim() || !o.value.trim() || !i.value || !v.value) ok = false;
+    }
+    if (step === 4) {
+      if (!getVal('tipovoo')) { document.getElementById('f-tipovoo').classList.add('invalid'); ok = false; }
+    }
+    if (step === 5) {
+      ['f-tipohosp','f-cat','f-regime','f-quarto'].forEach((fid, idx) => {
+        const names = ['tipohosp','categoria','regime','quarto'];
+        if (!getVal(names[idx])) { document.getElementById(fid).classList.add('invalid'); ok = false; }
+      });
+    }
+    if (step === 6) {
+      ['f-escopo','f-transfer','f-seguro','f-pgto'].forEach((fid, idx) => {
+        const names = ['escopo','transfer','seguro','pagamento'];
+        if (!getVal(names[idx])) { document.getElementById(fid).classList.add('invalid'); ok = false; }
+      });
+    }
+    if (step === 7) {
+      if (!getVal('motivo')) { document.getElementById('f-motivo').classList.add('invalid'); ok = false; }
+    }
+    return ok;
+  }
+
+  function next(step) {
+    if (!validate(step)) return;
+    current = step + 1;
+    showSection(current);
+  }
+
+  function back(step) {
+    current = step - 1;
+    showSection(current);
+  }
+
+  async function enviar() {
+    if (!validate(7)) return;
+
+    const btn = document.getElementById('btn-submit');
+    btn.classList.add('loading');
+    btn.textContent = 'Enviando...';
+
+    const data = {
+      nome: document.getElementById('nome').value,
+      whatsapp: document.getElementById('wpp').value,
+      email: document.getElementById('email').value,
+      adultos: getVal('adultos'),
+      criancas: getVal('criancas'),
+      idades_criancas: document.getElementById('idades').value,
+      necessidade_especial: getVal('necessidade'),
+      destino: document.getElementById('destino').value,
+      embarque: document.getElementById('origem').value,
+      data_ida: document.getElementById('ida').value,
+      data_volta: document.getElementById('volta').value,
+      flexibilidade_datas: getVal('flexdatas'),
+      tipo_voo: getVal('tipovoo'),
+      companhia_aerea: getVal('cia'),
+      tipo_hospedagem: getVal('tipohosp'),
+      categoria: getVal('categoria'),
+      regime: getVal('regime'),
+      tipo_quarto: getVal('quarto'),
+      escopo: getVal('escopo'),
+      transfer: getVal('transfer'),
+      seguro: getVal('seguro'),
+      orcamento: document.getElementById('orcamento').value,
+      pagamento: getVal('pagamento'),
+      motivo: getVal('motivo'),
+      ja_visitou: getVal('jafoi'),
+      detalhes: document.getElementById('detalhes').value,
+      timestamp: new Date().toLocaleString('pt-BR')
+    };
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } catch(e) { /* no-cors sempre "falha" mas envia */ }
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('success').classList.add('show');
+    document.querySelector('.progress-wrap').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
