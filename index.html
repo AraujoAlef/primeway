@@ -30,6 +30,8 @@
     <div class="mod-card" onclick="ir('s-ferramentas')"><span class="mod-ico">✈️</span><div class="mod-name">Ferramentas</div><div class="mod-desc">Checklist e pacote visual</div></div>
     <div class="mod-card" onclick="ir('s-hoteis')"><span class="mod-ico">🏨</span><div class="mod-name">Banco de Hotéis</div><div class="mod-desc">Pesquise e salve hotéis por cidade</div><div class="mod-badge">SHEETS</div></div>
     <div class="mod-card" onclick="ir('s-precificacao')"><span class="mod-ico">💼</span><div class="mod-name">Precificação</div><div class="mod-desc">Monte o preço com suas margens</div></div>
+    <div class="mod-card" onclick="abrirLeads()"><span class="mod-ico">📥</span><div class="mod-name">Leads do Site</div><div class="mod-desc">Cotações recebidas pelo formulário</div><div class="mod-badge">SHEETS</div></div>
+    <div class="mod-card" onclick="copiarFormLink()"><span class="mod-ico">🔗</span><div class="mod-name">Formulário</div><div class="mod-desc">Copiar link para enviar ao cliente</div></div>
   </div>
   <div class="home-footer">✈️ PRIMEWAY VIAGENS · SEU DESTINO COMEÇA AQUI</div>
 </div>
@@ -288,8 +290,7 @@
   <button class="btn-sec" onclick="fOv('ov-fin-m')">Cancelar</button>
 </div></div>
 
-
-<!-- ═══ HOTÉIS ═══ -->
+<!-- HOTÉIS -->
 <div class="screen" id="s-hoteis">
   <div class="mod-header">
     <button class="back-btn" onclick="voltar()">← Voltar</button>
@@ -369,5 +370,31 @@
 <div class="toast" id="toast"></div>
 <script src="app-part1.js"></script>
 <script src="app-part2.js"></script>
+
+<!-- FUNÇÕES DOS NOVOS CARDS -->
+<script>
+  const FORM_URL = 'https://araujoalef.github.io/prime/cotacao.html';
+  const LEADS_URL = 'https://docs.google.com/spreadsheets/d/1xoQ6fli03QkYZh-6vwYBrqHRpAiYeDbc7vOy8-LmqBw/edit';
+
+  function abrirLeads() {
+    window.open(LEADS_URL, '_blank');
+  }
+
+  function copiarFormLink() {
+    navigator.clipboard.writeText(FORM_URL).then(() => {
+      mostrarToast('🔗 Link copiado!');
+    }).catch(() => {
+      mostrarToast('❌ Erro ao copiar');
+    });
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
 </body>
 </html>
