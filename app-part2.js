@@ -227,4 +227,214 @@ function setTabFER(i){[0,1].forEach(function(k){document.getElementById('fer-tab
 // ── INIT ──────────────────────────────────────────────────────────────────────
 buildParc();
 Promise.all([aPost({action:'init',sheet:'Vendas'}),aPost({action:'init',sheet:'Despesas'}),aPost({action:'init',sheet:'Metas'})]).catch(function(){});
+// Init hoteis
+aPost({action:'init',sheet:'Hoteis'}).catch(function(){});
+
 if('serviceWorker' in navigator){navigator.serviceWorker.register('/primeway/sw.js').catch(function(){});}
+// ── HOTÉIS ────────────────────────────────────────────────────────────────────
+var HT_DB = [];
+
+function ssHT(s){
+  var el=document.getElementById('ht-sync');
+  if(!el)return;
+  if(s==='ok'){el.className='sync-badge s-ok';el.textContent='✅';}
+  else if(s==='err'){el.className='sync-badge s-err';el.textContent='❌';}
+  else{el.className='sync-badge s-load';el.textContent='⏳';}
+}
+
+function carregarHT(){
+  ssHT('load');
+  aGet('Hoteis').then(function(res){
+    HT_DB=res.ok?res.data.filter(function(r){return r.id;}).map(function(r){
+      return{
+        id:r.id, nome:r.nome||'', cidade:r.cidade||'', estado:r.estado||'',
+        estrelas:parseInt(r.estrelas)||0,
+        notaGoogle:parseFloat(r.notaGoogle)||0,
+        notaBooking:parseFloat(r.notaBooking)||0,
+        mediaNotas:parseFloat(r.mediaNotas)||0,
+        regime:r.regime||'', precoBaixa:parseFloat(r.precoBaixa)||0,
+        precoAlta:parseFloat(r.precoAlta)||0,
+        publico:r.publico||'Todos', obs:r.obs||'', link:r.link||'', criado:r.criado||''
+      };
+    }):[];
+    ssHT('ok'); renderHT();
+  }).catch(function(){ssHT('err');document.getElementById('ht-lista').innerHTML='<div class="empty"><span>📡</span>Sem conexão. Toque em 🔄</div>';});
+}
+
+function renderHT(){
+  var q=(document.getElementById('ht-busca').value||'').toLowerCase().trim();
+  var lista=HT_DB.filter(function(h){
+    if(!q) return true;
+    return (h.cidade||'').toLowerCase().includes(q)||
+           (h.nome||'').toLowerCase().includes(q)||
+           (h.estado||'').toLowerCase().includes(q);
+  }).sort(function(a,b){return b.mediaNotas-a.mediaNotas;});
+
+  var el=document.getElementById('ht-lista');
+  if(!lista.length){
+    el.innerHTML='<div class="empty"><span>🏨</span>'+(q?'Nenhum hotel encontrado para "'+q+'"':'Nenhum hotel cadastrado.<br>Toque em "+ Adicionar"')+'</div>';
+    return;
+  }
+
+  el.innerHTML=lista.map(function(h){
+    var estrelas='';
+    for(var i=0;i<5;i++) estrelas+='<span style="color:'+(i<h.estrelas?'#e8b84b':'#1e3060')+'">★</span>';
+    var mediaColor=h.mediaNotas>=4.5?'#4af0a0':h.mediaNotas>=4.0?'#e8b84b':'#ff7eb3';
+    var pubIco={familia:'👨‍👩‍👧',casal:'💑',todos:'👥'}[(h.publico||'').toLowerCase()]||'👥';
+
+    return '<div class="ht-card">'
+      +'<div class="ht-hdr" onclick="tDetHT(\''+h.id+'\')">'
+      +'<div class="ht-left">'
+      +'<div class="ht-nome">'+(h.nome||'Hotel')+'</div>'
+      +'<div class="ht-cidade">📍 '+(h.cidade||'')+(h.estado?', '+h.estado:'')+'</div>'
+      +'<div class="ht-estrelas">'+estrelas+'</div>'
+      +'</div>'
+      +'<div class="ht-right">'
+      +'<div class="ht-nota" style="background:'+mediaColor+'20;border:1px solid '+mediaColor+'40;color:'+mediaColor+'">'+h.mediaNotas.toFixed(1)+'</div>'
+      +'<div class="ht-pub">'+pubIco+' '+h.publico+'</div>'
+      +'</div>'
+      +'</div>'
+      +'<div class="ht-det" id="htd-'+h.id+'">'
+      +'<div class="ht-det-grid">'
+      +(h.notaGoogle?'<div class="ht-det-item"><div class="ht-det-lbl">🔍 Google</div><div class="ht-det-val">'+h.notaGoogle.toFixed(1)+'</div></div>':'')
+      +(h.notaBooking?'<div class="ht-det-item"><div class="ht-det-lbl">🏢 Booking</div><div class="ht-det-val">'+h.notaBooking.toFixed(1)+'</div></div>':'')
+      +(h.regime?'<div class="ht-det-item"><div class="ht-det-lbl">🍽️ Regime</div><div class="ht-det-val">'+h.regime+'</div></div>':'')
+      +(h.precoBaixa?'<div class="ht-det-item"><div class="ht-det-lbl">📅 Baixa temp.</div><div class="ht-det-val">'+fBRL(h.precoBaixa)+'/nt</div></div>':'')
+      +(h.precoAlta?'<div class="ht-det-item"><div class="ht-det-lbl">🔥 Alta temp.</div><div class="ht-det-val">'+fBRL(h.precoAlta)+'/nt</div></div>':'')
+      +'</div>'
+      +(h.obs?'<div class="ht-obs">📝 '+h.obs+'</div>':'')
+      +'<div class="cc-acts">'
+      +(h.link?'<button class="act" onclick="window.open(\''+h.link+'\',\'_blank\')">🔗 Ver hotel</button>':'')
+      +'<button class="act" onclick="editarHT(\''+h.id+'\')">✏️ Editar</button>'
+      +'<button class="act danger" onclick="excluirHT(\''+h.id+'\')">🗑️</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function tDetHT(id){var el=document.getElementById('htd-'+id);if(el)el.classList.toggle('open');}
+
+function calcMediaHT(){
+  var g=parseFloat(document.getElementById('ht-f-google').value)||0;
+  var b=parseFloat(document.getElementById('ht-f-booking').value)||0;
+  var count=0, soma=0;
+  if(g>0){soma+=g;count++;}
+  if(b>0){soma+=b;count++;}
+  var media=count>0?(soma/count):0;
+  document.getElementById('ht-media-preview').textContent=count>0?'Média: '+media.toFixed(1)+' ⭐':'';
+  return media;
+}
+
+function abrirModalHT(h){
+  document.getElementById('ht-modal-title').textContent=h?'Editar Hotel':'Adicionar Hotel';
+  document.getElementById('ht-edit-id').value=h?h.id:'';
+  document.getElementById('ht-f-nome').value=h?h.nome:'';
+  document.getElementById('ht-f-cidade').value=h?h.cidade:'';
+  document.getElementById('ht-f-estado').value=h?h.estado:'';
+  document.getElementById('ht-f-estrelas').value=h?h.estrelas:'3';
+  document.getElementById('ht-f-google').value=h&&h.notaGoogle?h.notaGoogle:'';
+  document.getElementById('ht-f-booking').value=h&&h.notaBooking?h.notaBooking:'';
+  document.getElementById('ht-f-regime').value=h?(h.regime||''):'';
+  document.getElementById('ht-f-baixa').value=h&&h.precoBaixa?h.precoBaixa.toLocaleString('pt-BR',{minimumFractionDigits:2}):'';
+  document.getElementById('ht-f-alta').value=h&&h.precoAlta?h.precoAlta.toLocaleString('pt-BR',{minimumFractionDigits:2}):'';
+  document.getElementById('ht-f-publico').value=h?(h.publico||'Todos'):'Todos';
+  document.getElementById('ht-f-obs').value=h?h.obs:'';
+  document.getElementById('ht-f-link').value=h?h.link:'';
+  document.getElementById('ht-media-preview').textContent='';
+  if(h) calcMediaHT();
+  document.getElementById('ov-ht').classList.add('open');
+}
+
+function salvarHT(){
+  var nome=document.getElementById('ht-f-nome').value.trim();
+  var cidade=document.getElementById('ht-f-cidade').value.trim();
+  if(!nome||!cidade){alert('Informe nome e cidade!');return;}
+  var g=parseFloat(document.getElementById('ht-f-google').value)||0;
+  var b=parseFloat(document.getElementById('ht-f-booking').value)||0;
+  var count=0,soma=0;
+  if(g>0){soma+=g;count++;}
+  if(b>0){soma+=b;count++;}
+  var media=count>0?(soma/count):0;
+  var eid=document.getElementById('ht-edit-id').value;
+  var item={
+    id:eid||String(Date.now()), nome:nome,
+    cidade:cidade, estado:document.getElementById('ht-f-estado').value.trim(),
+    estrelas:document.getElementById('ht-f-estrelas').value,
+    notaGoogle:g, notaBooking:b, mediaNotas:parseFloat(media.toFixed(2)),
+    regime:document.getElementById('ht-f-regime').value,
+    precoBaixa:pV(document.getElementById('ht-f-baixa').value),
+    precoAlta:pV(document.getElementById('ht-f-alta').value),
+    publico:document.getElementById('ht-f-publico').value,
+    obs:document.getElementById('ht-f-obs').value.trim(),
+    link:document.getElementById('ht-f-link').value.trim(),
+    criado:eid?'':new Date().toISOString()
+  };
+  var btn=document.getElementById('ht-save-btn');
+  btn.textContent='⏳ Salvando...';btn.disabled=true;
+  aPost({action:'save',sheet:'Hoteis',item:item}).then(function(res){
+    btn.textContent='💾 Salvar';btn.disabled=false;
+    if(res.ok){fOv('ov-ht');toast('✅ Hotel salvo!');carregarHT();}
+    else toast('❌ Erro ao salvar.');
+  }).catch(function(){btn.textContent='💾 Salvar';btn.disabled=false;toast('❌ Sem conexão.');});
+}
+
+function editarHT(id){var h=HT_DB.find(function(x){return String(x.id)===String(id);});if(h)abrirModalHT(h);}
+
+function excluirHT(id){
+  if(!confirm('Excluir este hotel?'))return;
+  aPost({action:'delete',sheet:'Hoteis',id:id}).then(function(res){
+    if(res.ok){toast('🗑️ Hotel excluído!');carregarHT();}else toast('❌ Erro.');
+  }).catch(function(){toast('❌ Sem conexão.');});
+}
+
+// ── PRECIFICAÇÃO ──────────────────────────────────────────────────────────────
+function calcPC(){
+  var hotel=pV(document.getElementById('pc-hotel').value);
+  var mhotel=parseInt(document.getElementById('pc-hotel-pct').value)/100;
+  var voo=pV(document.getElementById('pc-voo').value);
+  var mvoo=parseInt(document.getElementById('pc-voo-pct').value)/100;
+  var embarque=pV(document.getElementById('pc-embarque').value);
+  var transfer=pV(document.getElementById('pc-transfer').value);
+  var mtransfer=parseInt(document.getElementById('pc-transfer-pct').value)/100;
+  var carro=pV(document.getElementById('pc-carro').value);
+  var mcarro=parseInt(document.getElementById('pc-carro-pct').value)/100;
+  var passeios=pV(document.getElementById('pc-passeios').value);
+  var mpasseios=parseInt(document.getElementById('pc-passeios-pct').value)/100;
+  var seguro=pV(document.getElementById('pc-seguro').value);
+  var mseguro=parseInt(document.getElementById('pc-seguro-pct').value)/100;
+  var custo=hotel+voo+embarque+transfer+carro+passeios+seguro;
+  if(custo===0){document.getElementById('pc-resultado').innerHTML='<div class="empty"><span>💼</span>Preencha os valores acima</div>';return;}
+  var comHotel=hotel*mhotel,comVoo=voo*mvoo,comTransfer=transfer*mtransfer;
+  var comCarro=carro*mcarro,comPasseios=passeios*mpasseios,comSeguro=seguro*mseguro;
+  var comTotal=comHotel+comVoo+comTransfer+comCarro+comPasseios+comSeguro;
+  var precoFinal=custo+comTotal;
+  document.getElementById('pc-resultado').innerHTML=
+    '<div style="background:linear-gradient(135deg,#152347,#1c2e58);border:1px solid rgba(232,184,75,.3);border-radius:14px;padding:16px;margin-bottom:10px;">'
+    +'<div style="font-size:10px;font-weight:700;color:#8a9bb5;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">💵 Preço final para o cliente</div>'
+    +'<div style="font-size:38px;font-weight:800;color:#e8b84b;letter-spacing:-1px;line-height:1;">'+fBRL(precoFinal)+'</div>'
+    +'<div style="display:flex;justify-content:space-between;margin-top:12px;">'
+    +'<div><div style="font-size:9px;color:#8a9bb5;text-transform:uppercase;letter-spacing:.8px;">Seu custo</div><div style="font-size:14px;font-weight:700;color:#f0f0f0;">'+fBRL(custo)+'</div></div>'
+    +'<div style="text-align:right"><div style="font-size:9px;color:#8a9bb5;text-transform:uppercase;letter-spacing:.8px;">Sua comissão</div><div style="font-size:14px;font-weight:700;color:#4af0a0;">'+fBRL(comTotal)+'</div></div>'
+    +'</div></div>'
+    +'<div style="background:#152347;border:1px solid #1e3060;border-radius:12px;padding:12px 14px;margin-bottom:8px;">'
+    +'<div style="font-size:10px;font-weight:700;color:#8a9bb5;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Detalhamento</div>'
+    +(hotel?'<div class="det-row"><span class="det-k">🏨 Hotel</span><span class="det-v">'+fBRL(hotel)+(mhotel>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comHotel)+')</span>':'')+'</span></div>':'')
+    +(voo?'<div class="det-row"><span class="det-k">✈️ Passagem</span><span class="det-v">'+fBRL(voo)+(mvoo>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comVoo)+')</span>':'')+'</span></div>':'')
+    +(embarque?'<div class="det-row"><span class="det-k">🛫 Tx. Embarque</span><span class="det-v">'+fBRL(embarque)+' <span style="color:#8a9bb5;font-size:10px;">(sem margem)</span></span></div>':'')
+    +(transfer?'<div class="det-row"><span class="det-k">🚐 Transfer</span><span class="det-v">'+fBRL(transfer)+(mtransfer>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comTransfer)+')</span>':'')+'</span></div>':'')
+    +(carro?'<div class="det-row"><span class="det-k">🚗 Aluguel carro</span><span class="det-v">'+fBRL(carro)+(mcarro>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comCarro)+')</span>':'')+'</span></div>':'')
+    +(passeios?'<div class="det-row"><span class="det-k">🎡 Passeios</span><span class="det-v">'+fBRL(passeios)+(mpasseios>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comPasseios)+')</span>':'')+'</span></div>':'')
+    +(seguro?'<div class="det-row"><span class="det-k">🛡️ Seguro</span><span class="det-v">'+fBRL(seguro)+(mseguro>0?' <span style="color:#4af0a0;font-size:10px;">(+'+fBRL(comSeguro)+')</span>':'')+'</span></div>':'')
+    +'<div class="det-row" style="border-top:1px solid #1e3060;padding-top:8px;margin-top:4px;"><span class="det-k" style="font-weight:700;color:#f0f0f0;">Total cliente</span><span class="det-v" style="color:#e8b84b;font-size:14px;">'+fBRL(precoFinal)+'</span></div>'
+    +'</div>'
+    +'<div style="background:rgba(74,240,160,.07);border:1px solid rgba(74,240,160,.2);border-radius:10px;padding:10px 13px;text-align:center;font-size:12px;color:#4af0a0;font-weight:700;">'
+    +'📈 Margem: '+(custo>0?(comTotal/custo*100).toFixed(1):0)+'% &nbsp;|&nbsp; Comissão: '+fBRL(comTotal)
+    +'</div>';
+}
+function limparPC(){
+  ['pc-hotel','pc-voo','pc-embarque','pc-transfer','pc-carro','pc-passeios','pc-seguro'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var def={'pc-hotel-pct':10,'pc-voo-pct':5,'pc-transfer-pct':0,'pc-carro-pct':0,'pc-passeios-pct':0,'pc-seguro-pct':15};
+  Object.keys(def).forEach(function(id){var el=document.getElementById(id);if(el){el.value=def[id];var lbl=document.getElementById(id+'-lbl');if(lbl)lbl.textContent=def[id];}});
+  document.getElementById('pc-resultado').innerHTML='<div class="empty"><span>💼</span>Preencha os valores acima</div>';
+}
