@@ -201,3 +201,21 @@ body{background:var(--navy);color:var(--text);font-family:system-ui,-apple-syste
 .mfield textarea{resize:none;min-height:60px;line-height:1.5;}
 .mfield select option{background:var(--navy2);}
 .mgrid2{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+
+/* ── HOTÉIS ── */
+.ht-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;}
+.ht-hdr{padding:12px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.ht-left{flex:1;min-width:0;}
+.ht-nome{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ht-cidade{font-size:11px;color:var(--muted);margin-top:2px;}
+.ht-estrelas{font-size:13px;margin-top:4px;}
+.ht-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.ht-nota{font-size:16px;font-weight:800;padding:4px 10px;border-radius:8px;line-height:1;}
+.ht-pub{font-size:10px;color:var(--muted);}
+.ht-det{display:none;border-top:1px solid var(--border);padding:10px 14px;}
+.ht-det.open{display:block;}
+.ht-det-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.ht-det-item{background:var(--navy3);border-radius:7px;padding:7px 9px;}
+.ht-det-lbl{font-size:8px;font-weight:700;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px;}
+.ht-det-val{font-size:12px;font-weight:700;color:var(--text);}
+.ht-obs{background:var(--navy3);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:8px;}
