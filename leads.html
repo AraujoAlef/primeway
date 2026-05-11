@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leads — PrimeWay Viagens</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --navy: #0D1B2A;
+    --navy-mid: #152336;
+    --navy-light: #1E3048;
+    --white: #F5F0E8;
+    --white-mid: rgba(245,240,232,0.55);
+    --white-dim: rgba(245,240,232,0.07);
+
+    --s-novo: #60b4ff;
+    --s-cotando: #f59e0b;
+    --s-proposta: #a78bfa;
+    --s-fechado: #4af0a0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 10% 0%, rgba(201,168,76,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 90% 100%, rgba(201,168,76,0.05) 0%, transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  /* HEADER */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .header-left a { font-size: 12px; color: var(--gold); text-decoration: none; letter-spacing: 0.05em; }
+  .header-left a:hover { opacity: 0.8; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; color: var(--white); text-align: center; }
+  .header-title span { color: var(--gold-light); font-style: italic; }
+  .btn-refresh { background: var(--white-dim); border: 0.5px solid rgba(201,168,76,0.25); border-radius: 8px; padding: 8px 14px; color: var(--white-mid); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .btn-refresh:hover { border-color: var(--gold); color: var(--white); }
+  .btn-refresh.loading { opacity: 0.5; pointer-events: none; }
+
+  /* STATS */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .stat { background: var(--white-dim); border: 0.5px solid rgba(201,168,76,0.15); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-n { font-size: 22px; font-weight: 500; margin-bottom: 2px; }
+  .stat-l { font-size: 10px; color: var(--white-mid); letter-spacing: 0.05em; text-transform: uppercase; }
+
+  /* FILTROS */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .ftag { font-size: 11px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(201,168,76,0.2); background: transparent; color: var(--white-mid); cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em; }
+  .ftag:hover, .ftag.on { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* BUSCA */
+  .search-wrap { position: relative; margin-bottom: 1.25rem; }
+  .search-wrap input { width: 100%; background: var(--white-dim); border: 0.5px solid rgba(201,168,76,0.2); border-radius: 8px; padding: 11px 16px 11px 38px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--white); outline: none; transition: border-color 0.2s; }
+  .search-wrap input::placeholder { color: rgba(245,240,232,0.3); }
+  .search-wrap input:focus { border-color: var(--gold); }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+
+  /* CARDS */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .card { background: var(--navy-mid); border: 0.5px solid rgba(201,168,76,0.15); border-radius: 12px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+  .card:hover { border-color: rgba(201,168,76,0.35); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .card-nome { font-size: 15px; font-weight: 500; color: var(--white); }
+  .card-wpp { font-size: 12px; color: var(--white-mid); margin-top: 2px; }
+
+  .status-badge { font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s; }
+  .status-badge:hover { opacity: 0.8; }
+  .s-novo    { background: rgba(96,180,255,0.15); color: var(--s-novo); border: 0.5px solid rgba(96,180,255,0.3); }
+  .s-cotando { background: rgba(245,158,11,0.15); color: var(--s-cotando); border: 0.5px solid rgba(245,158,11,0.3); }
+  .s-proposta{ background: rgba(167,139,250,0.15); color: var(--s-proposta); border: 0.5px solid rgba(167,139,250,0.3); }
+  .s-fechado { background: rgba(74,240,160,0.15); color: var(--s-fechado); border: 0.5px solid rgba(74,240,160,0.3); }
+
+  .card-info { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-bottom: 10px; }
+  .info-item { font-size: 12px; }
+  .info-label { color: var(--white-mid); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1px; }
+  .info-val { color: var(--white); }
+
+  .card-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 0.5px solid var(--white-dim); }
+  .card-ts { font-size: 10px; color: rgba(245,240,232,0.3); }
+  .card-actions { display: flex; gap: 6px; }
+  .btn-wpp { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 0.5px solid rgba(74,240,160,0.3); background: rgba(74,240,160,0.08); color: var(--s-fechado); cursor: pointer; text-decoration: none; transition: all 0.2s; }
+  .btn-wpp:hover { background: rgba(74,240,160,0.15); }
+  .btn-detail { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 0.5px solid rgba(201,168,76,0.3); background: var(--gold-dim); color: var(--gold); cursor: pointer; transition: all 0.2s; }
+  .btn-detail:hover { background: rgba(201,168,76,0.2); }
+
+  /* MODAL STATUS */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--navy-mid); border: 0.5px solid rgba(201,168,76,0.3); border-radius: 16px; padding: 1.5rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; color: var(--gold-light); margin-bottom: 1.25rem; }
+  .modal-row { margin-bottom: 12px; }
+  .modal-label { font-size: 10px; color: var(--white-mid); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .modal-val { font-size: 13px; color: var(--white); line-height: 1.5; }
+  .modal-divider { height: 0.5px; background: var(--white-dim); margin: 1rem 0; }
+  .status-options { display: flex; flex-direction: column; gap: 8px; }
+  .status-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; border: 0.5px solid rgba(201,168,76,0.2); cursor: pointer; transition: all 0.2s; font-size: 13px; }
+  .status-opt:hover { border-color: var(--gold); background: var(--gold-dim); }
+  .status-opt.selected { border-color: var(--gold); background: var(--gold-dim); }
+  .modal-close { width: 100%; margin-top: 1rem; padding: 10px; background: transparent; border: 0.5px solid rgba(201,168,76,0.2); border-radius: 8px; color: var(--white-mid); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .modal-close:hover { border-color: var(--gold); color: var(--white); }
+
+  /* EMPTY / LOADING */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--white-mid); font-size: 14px; }
+  .empty .icon { font-size: 36px; display: block; margin-bottom: 1rem; }
+
+  @media(max-width: 480px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .card-info { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-left">
+      <a href="index.html">← Voltar</a>
+    </div>
+    <div class="header-title">📥 Leads do <span>Site</span></div>
+    <button class="btn-refresh" id="btn-refresh" onclick="carregar()">🔄 Atualizar</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="st-total" style="color:var(--gold)">—</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n" id="st-novo" style="color:var(--s-novo)">—</div><div class="stat-l">Novos</div></div>
+    <div class="stat"><div class="stat-n" id="st-cotando" style="color:var(--s-cotando)">—</div><div class="stat-l">Cotando</div></div>
+    <div class="stat"><div class="stat-n" id="st-fechado" style="color:var(--s-fechado)">—</div><div class="stat-l">Fechados</div></div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filters">
+    <button class="ftag on" data-f="todos" onclick="setFiltro('todos',this)">Todos</button>
+    <button class="ftag" data-f="novo" onclick="setFiltro('novo',this)">🔵 Novo lead</button>
+    <button class="ftag" data-f="cotando" onclick="setFiltro('cotando',this)">🟡 Cotando</button>
+    <button class="ftag" data-f="proposta" onclick="setFiltro('proposta',this)">🟣 Proposta enviada</button>
+    <button class="ftag" data-f="fechado" onclick="setFiltro('fechado',this)">🟢 Fechado</button>
+  </div>
+
+  <!-- BUSCA -->
+  <div class="search-wrap">
+    <input type="text" id="busca" placeholder="Buscar por nome, destino, WhatsApp..." oninput="renderCards()">
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards" id="cards-wrap">
+    <div class="empty"><span class="icon">⏳</span>Carregando leads...</div>
+  </div>
+
+</div>
+
+<!-- MODAL DETALHES / STATUS -->
+<div class="overlay" id="modal-overlay" onclick="fecharModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-nome">—</div>
+
+    <div class="modal-row"><div class="modal-label">WhatsApp</div><div class="modal-val" id="modal-wpp">—</div></div>
+    <div class="modal-row"><div class="modal-label">E-mail</div><div class="modal-val" id="modal-email">—</div></div>
+    <div class="modal-row"><div class="modal-label">Destino</div><div class="modal-val" id="modal-destino">—</div></div>
+    <div class="modal-row"><div class="modal-label">Embarque</div><div class="modal-val" id="modal-embarque">—</div></div>
+    <div class="modal-row"><div class="modal-label">Período</div><div class="modal-val" id="modal-periodo">—</div></div>
+    <div class="modal-row"><div class="modal-label">Grupo</div><div class="modal-val" id="modal-grupo">—</div></div>
+    <div class="modal-row"><div class="modal-label">Hospedagem</div><div class="modal-val" id="modal-hosp">—</div></div>
+    <div class="modal-row"><div class="modal-label">Escopo</div><div class="modal-val" id="modal-escopo">—</div></div>
+    <div class="modal-row"><div class="modal-label">Orçamento</div><div class="modal-val" id="modal-orc">—</div></div>
+    <div class="modal-row"><div class="modal-label">Pagamento</div><div class="modal-val" id="modal-pgto">—</div></div>
+    <div class="modal-row"><div class="modal-label">Motivo</div><div class="modal-val" id="modal-motivo">—</div></div>
+    <div class="modal-row"><div class="modal-label">Detalhes especiais</div><div class="modal-val" id="modal-detalhes">—</div></div>
+    <div class="modal-row"><div class="modal-label">Recebido em</div><div class="modal-val" id="modal-ts">—</div></div>
+
+    <div class="modal-divider"></div>
+    <div class="modal-label" style="margin-bottom:8px;">Atualizar status</div>
+    <div class="status-options">
+      <div class="status-opt" data-s="novo" onclick="selecionarStatus('novo',this)">🔵 Novo lead</div>
+      <div class="status-opt" data-s="cotando" onclick="selecionarStatus('cotando',this)">🟡 Cotando</div>
+      <div class="status-opt" data-s="proposta" onclick="selecionarStatus('proposta',this)">🟣 Proposta enviada</div>
+      <div class="status-opt" data-s="fechado" onclick="selecionarStatus('fechado',this)">🟢 Fechado</div>
+    </div>
+
+    <button class="modal-close" onclick="fecharModal()">Fechar</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const SHEET_ID = '1xoQ6fli03QkYZh-6vwYBrqHRpAiYeDbc7vOy8-LmqBw';
+const SHEET_NAME = 'Cotacoes';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+
+let allLeads = [];
+let filtroAtual = 'todos';
+let modalIdx = null;
+
+// Status salvo localmente (por timestamp como chave)
+const STATUS_KEY = 'pw_leads_status';
+function getStatuses() { try { return JSON.parse(localStorage.getItem(STATUS_KEY) || '{}'); } catch(e) { return {}; } }
+function saveStatus(key, val) { const s = getStatuses(); s[key] = val; localStorage.setItem(STATUS_KEY, JSON.stringify(s)); }
+
+// ── CARREGAR DO SHEETS ──
+async function carregar() {
+  const btn = document.getElementById('btn-refresh');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Carregando...';
+
+  try {
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    const txt = await res.text();
+    allLeads = parseCSV(txt);
+    renderCards();
+    atualizarStats();
+  } catch(e) {
+    document.getElementById('cards-wrap').innerHTML = `<div class="empty"><span class="icon">❌</span>Erro ao carregar. Verifique se a planilha está pública.</div>`;
+  }
+
+  btn.classList.remove('loading');
+  btn.textContent = '🔄 Atualizar';
+}
+
+function parseCSV(txt) {
+  const lines = txt.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  }).filter(r => r.nome || r.whatsapp);
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── RENDER ──
+function renderCards() {
+  const busca = document.getElementById('busca').value.toLowerCase();
+  const statuses = getStatuses();
+
+  let leads = allLeads.map((l, i) => ({
+    ...l,
+    _idx: i,
+    _status: statuses[l.timestamp] || 'novo'
+  }));
+
+  if (filtroAtual !== 'todos') {
+    leads = leads.filter(l => l._status === filtroAtual);
+  }
+
+  if (busca) {
+    leads = leads.filter(l =>
+      (l.nome||'').toLowerCase().includes(busca) ||
+      (l.whatsapp||'').toLowerCase().includes(busca) ||
+      (l.destino||'').toLowerCase().includes(busca)
+    );
+  }
+
+  // mais recentes primeiro
+  leads.reverse();
+
+  const wrap = document.getElementById('cards-wrap');
+  if (leads.length === 0) {
+    wrap.innerHTML = `<div class="empty"><span class="icon">📭</span>Nenhum lead encontrado.</div>`;
+    return;
+  }
+
+  wrap.innerHTML = leads.map(l => cardHTML(l)).join('');
+  atualizarStats();
+}
+
+function statusInfo(s) {
+  const map = {
+    novo:     { label: '🔵 Novo lead',        cls: 's-novo' },
+    cotando:  { label: '🟡 Cotando',          cls: 's-cotando' },
+    proposta: { label: '🟣 Proposta enviada', cls: 's-proposta' },
+    fechado:  { label: '🟢 Fechado',          cls: 's-fechado' },
+  };
+  return map[s] || map['novo'];
+}
+
+function cardHTML(l) {
+  const si = statusInfo(l._status);
+  const wpp = (l.whatsapp||'').replace(/\D/g,'');
+  const wppLink = wpp ? `https://wa.me/55${wpp}` : '#';
+
+  return `
+  <div class="card">
+    <div class="card-top">
+      <div>
+        <div class="card-nome">${l.nome || '—'}</div>
+        <div class="card-wpp">${l.whatsapp || '—'}</div>
+      </div>
+      <span class="status-badge ${si.cls}" onclick="abrirModal(${l._idx})">${si.label}</span>
+    </div>
+    <div class="card-info">
+      <div class="info-item"><div class="info-label">Destino</div><div class="info-val">${l.destino || '—'}</div></div>
+      <div class="info-item"><div class="info-label">Embarque</div><div class="info-val">${l.embarque || '—'}</div></div>
+      <div class="info-item"><div class="info-label">Ida</div><div class="info-val">${l.data_ida || '—'}</div></div>
+      <div class="info-item"><div class="info-label">Volta</div><div class="info-val">${l.data_volta || '—'}</div></div>
+      <div class="info-item"><div class="info-label">Adultos</div><div class="info-val">${l.adultos || '—'}</div></div>
+      <div class="info-item"><div class="info-label">Orçamento</div><div class="info-val">${l.orcamento || 'Não informado'}</div></div>
+    </div>
+    <div class="card-bottom">
+      <span class="card-ts">${l.timestamp || ''}</span>
+      <div class="card-actions">
+        <a class="btn-wpp" href="${wppLink}" target="_blank">💬 WhatsApp</a>
+        <button class="btn-detail" onclick="abrirModal(${l._idx})">Ver tudo</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function atualizarStats() {
+  const statuses = getStatuses();
+  const leads = allLeads.map(l => statuses[l.timestamp] || 'novo');
+  document.getElementById('st-total').textContent = allLeads.length;
+  document.getElementById('st-novo').textContent = leads.filter(s => s === 'novo').length;
+  document.getElementById('st-cotando').textContent = leads.filter(s => s === 'cotando').length;
+  document.getElementById('st-fechado').textContent = leads.filter(s => s === 'fechado').length;
+}
+
+// ── FILTRO ──
+function setFiltro(f, btn) {
+  filtroAtual = f;
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderCards();
+}
+
+// ── MODAL ──
+function abrirModal(idx) {
+  const l = allLeads[idx];
+  if (!l) return;
+  modalIdx = idx;
+
+  const statuses = getStatuses();
+  const status = statuses[l.timestamp] || 'novo';
+
+  document.getElementById('modal-nome').textContent = l.nome || '—';
+  document.getElementById('modal-wpp').textContent = l.whatsapp || '—';
+  document.getElementById('modal-email').textContent = l.email || 'Não informado';
+  document.getElementById('modal-destino').textContent = l.destino || '—';
+  document.getElementById('modal-embarque').textContent = l.embarque || '—';
+  document.getElementById('modal-periodo').textContent = `${l.data_ida || '—'} → ${l.data_volta || '—'} (${l.flexibilidade_datas || ''})`;
+  document.getElementById('modal-grupo').textContent = `${l.adultos || '—'} adulto(s) · ${l.criancas || 'sem crianças'}`;
+  document.getElementById('modal-hosp').textContent = [l.tipo_hospedagem, l.categoria, l.regime, l.tipo_quarto].filter(Boolean).join(' · ') || '—';
+  document.getElementById('modal-escopo').textContent = [l.escopo, l.transfer ? 'Transfer: '+l.transfer : '', l.seguro ? 'Seguro: '+l.seguro : ''].filter(Boolean).join(' · ') || '—';
+  document.getElementById('modal-orc').textContent = l.orcamento || 'Não informado';
+  document.getElementById('modal-pgto').textContent = l.pagamento || '—';
+  document.getElementById('modal-motivo').textContent = l.motivo || '—';
+  document.getElementById('modal-detalhes').textContent = l.detalhes || 'Nenhum';
+  document.getElementById('modal-ts').textContent = l.timestamp || '—';
+
+  document.querySelectorAll('.status-opt').forEach(o => {
+    o.classList.toggle('selected', o.dataset.s === status);
+  });
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function fecharModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay') && e.type !== 'click') return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalIdx = null;
+}
+
+function selecionarStatus(s, el) {
+  if (modalIdx === null) return;
+  const l = allLeads[modalIdx];
+  saveStatus(l.timestamp, s);
+  document.querySelectorAll('.status-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  renderCards();
+  atualizarStats();
+}
+
+// ── INIT ──
+carregar();
+</script>
+</body>
+</html>
