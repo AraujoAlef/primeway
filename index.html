@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#e8b84b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PrimeWay">
+<title>PrimeWay Viagens</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="home-header">
+    <div class="home-logo-circle"><div class="home-logo-p">P</div></div>
+    <div class="home-brand">PRIME<span>WAY</span></div>
+    <div class="home-viagens">Viagens</div>
+    <div class="home-tagline">✈️ Seu Destino Começa Aqui</div>
+  </div>
+  <div class="home-date" id="home-date"></div>
+  <div class="modules-grid">
+    <div class="mod-card" onclick="ir('s-cotacao')"><span class="mod-ico">📋</span><div class="mod-name">Cotação</div><div class="mod-desc">Gerar cotação para o cliente</div></div>
+    <div class="mod-card" onclick="ir('s-clientes')"><span class="mod-ico">👥</span><div class="mod-name">Clientes</div><div class="mod-desc">Cadastro e gestão de leads</div><div class="mod-badge">SHEETS</div></div>
+    <div class="mod-card" onclick="ir('s-financeiro')"><span class="mod-ico">💰</span><div class="mod-name">Financeiro</div><div class="mod-desc">Vendas, despesas e metas</div><div class="mod-badge">SHEETS</div></div>
+    <div class="mod-card" onclick="ir('s-marketing')"><span class="mod-ico">📱</span><div class="mod-name">Marketing</div><div class="mod-desc">Legendas, calendário e scripts</div></div>
+    <div class="mod-card" onclick="ir('s-calc')"><span class="mod-ico">🧮</span><div class="mod-name">Calculadoras</div><div class="mod-desc">InfinitePay e meta mensal</div></div>
+    <div class="mod-card" onclick="ir('s-ferramentas')"><span class="mod-ico">✈️</span><div class="mod-name">Ferramentas</div><div class="mod-desc">Checklist e pacote visual</div></div>
+    <div class="mod-card" onclick="ir('s-hoteis')"><span class="mod-ico">🏨</span><div class="mod-name">Banco de Hotéis</div><div class="mod-desc">Pesquise e salve hotéis por cidade</div><div class="mod-badge">SHEETS</div></div>
+    <div class="mod-card" onclick="ir('s-precificacao')"><span class="mod-ico">💼</span><div class="mod-name">Precificação</div><div class="mod-desc">Monte o preço com suas margens</div></div>
+    <div class="mod-card" onclick="abrirLeads()"><span class="mod-ico">📥</span><div class="mod-name">Leads do Site</div><div class="mod-desc">Cotações recebidas pelo formulário</div><div class="mod-badge">SHEETS</div></div>
+    <div class="mod-card" onclick="copiarFormLink()"><span class="mod-ico">🔗</span><div class="mod-name">Formulário</div><div class="mod-desc">Copiar link para enviar ao cliente</div></div>
+  </div>
+  <div class="home-footer">✈️ PRIMEWAY VIAGENS · SEU DESTINO COMEÇA AQUI</div>
+</div>
+
+<!-- COTAÇÃO -->
+<div class="screen" id="s-cotacao">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Gerador de Cotação</div><div class="mod-header-sub">Texto para enviar ao cliente</div></div><span style="font-size:22px;">📋</span></div>
+  <div class="wrap">
+    <div class="sec-lbl">Cliente</div>
+    <div class="field"><label>Nome do cliente</label><input id="cot-nome" type="text" placeholder="Ex: Ana Silva" /></div>
+    <div class="field"><label>Destino</label><input id="cot-dest" type="text" placeholder="Ex: Fortaleza, Cancún..." /></div>
+    <div class="sec-lbl">Aéreo</div>
+    <div class="grid2"><div class="field"><label>Data ida</label><input id="cot-dida" type="date" /></div><div class="field"><label>Hora ida</label><input id="cot-hida" type="time" /></div></div>
+    <div class="grid2"><div class="field"><label>Data volta</label><input id="cot-dvolta" type="date" /></div><div class="field"><label>Hora volta</label><input id="cot-hvolta" type="time" /></div></div>
+    <div class="field"><label>Cia Aérea</label><input id="cot-cia" type="text" placeholder="Ex: LATAM, GOL, Azul..." /></div>
+    <div class="field"><label>Tipo de voo</label><select id="cot-voo"><option value="">—</option><option>Voo direto</option><option>Com 1 escala</option><option>Com 2 escalas</option></select></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#152347;border:1px solid #1e3060;border-radius:10px;padding:11px 13px;margin-bottom:7px;"><span style="font-size:13px;color:#8a9bb5;">Bagagem 23kg inclusa</span><button class="chip" id="tog-mala" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'Sim':'Não';">Não</button></div>
+    <div class="sec-lbl">Hospedagem</div>
+    <div class="field"><label>Hotel</label><input id="cot-hotel" type="text" placeholder="Ex: Hilton Garden Inn" /></div>
+    <div class="grid2"><div class="field"><label>Categoria</label><select id="cot-hcat"><option value="">—</option><option>3 estrelas</option><option>4 estrelas</option><option>5 estrelas</option><option>Resort</option><option>Pousada</option></select></div><div class="field"><label>Noites</label><input id="cot-noites" type="number" placeholder="Ex: 5" min="1" /></div></div>
+    <div class="field"><label>Regime</label><select id="cot-regime"><option value="">—</option><option>Sem alimentação</option><option>Café da manhã incluso</option><option>Meia pensão</option><option>All Inclusive</option></select></div>
+    <div class="sec-lbl">Serviços</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#152347;border:1px solid #1e3060;border-radius:10px;padding:11px 13px;margin-bottom:7px;"><span style="font-size:13px;color:#8a9bb5;">Transfer incluso</span><button class="chip" id="tog-transfer" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'Sim':'Não';">Não</button></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#152347;border:1px solid #1e3060;border-radius:10px;padding:11px 13px;margin-bottom:7px;"><span style="font-size:13px;color:#8a9bb5;">Seguro viagem incluso</span><button class="chip" id="tog-seguro-cot" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'Sim':'Não';">Não</button></div>
+    <div class="sec-lbl">Valores</div>
+    <div class="grid2"><div class="field"><label>Valor por pessoa</label><input id="cot-vpax" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div><div class="field"><label>Nº passageiros</label><input id="cot-pax" type="number" placeholder="1" min="1" /></div></div>
+    <div class="field"><label>Valor total</label><input id="cot-total" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div>
+    <div class="field"><label>Forma de pagamento</label><input id="cot-pgto" type="text" placeholder="Ex: 10x no cartão, Pix à vista" /></div>
+    <div class="sec-lbl">Adicionais</div>
+    <div class="field"><textarea id="cot-add" placeholder="Passeios, ingressos, observações..."></textarea></div>
+    <button class="btn-gold" onclick="gerarCotacao()">✦ GERAR COTAÇÃO</button>
+    <button class="btn-sec" onclick="limparCot()">Limpar</button>
+    <div id="cot-output" style="display:none;margin-top:12px;"><div class="output-box" id="cot-txt"></div><div class="out-actions"><button class="btn-copy" onclick="copiarEl('cot-txt',this)">📋 Copiar</button><button class="btn-wpp" onclick="wppEl('cot-txt')">📲 WhatsApp</button></div></div>
+  </div>
+</div>
+
+<!-- CLIENTES -->
+<div class="screen" id="s-clientes">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Painel de Clientes</div><div class="mod-header-sub">Google Sheets sincronizado</div></div><div class="sync-badge s-load" id="cl-sync">⏳</div></div>
+  <div class="wrap">
+    <div class="stats-grid" id="cl-stats">
+      <div class="stat"><div class="stat-n" style="color:#60b4ff">—</div><div class="stat-l">Leads</div></div>
+      <div class="stat"><div class="stat-n" style="color:#e8b84b">—</div><div class="stat-l">Andamento</div></div>
+      <div class="stat"><div class="stat-n" style="color:#4af0a0">—</div><div class="stat-l">Fechados</div></div>
+      <div class="stat"><div class="stat-n" style="color:#b78aff">—</div><div class="stat-l">Viajaram</div></div>
+    </div>
+    <div class="top-bar"><div class="search-wrap"><span>🔍</span><input id="cl-busca" type="text" placeholder="Buscar..." oninput="renderCL()" /></div><button class="btn-sync-sm" onclick="carregarCL()">🔄</button><button class="btn-add" onclick="abrirModalCL()">+ Novo</button></div>
+    <div class="ftags">
+      <button class="ftag on" data-f="todos" onclick="setFCL('todos')">Todos</button>
+      <button class="ftag" data-f="lead" onclick="setFCL('lead')">🔵 Lead</button>
+      <button class="ftag" data-f="cotado" onclick="setFCL('cotado')">🟡 Cotado</button>
+      <button class="ftag" data-f="negociando" onclick="setFCL('negociando')">🟣 Negociando</button>
+      <button class="ftag" data-f="fechado" onclick="setFCL('fechado')">🟢 Fechado</button>
+      <button class="ftag" data-f="viajou" onclick="setFCL('viajou')">🩷 Viajou</button>
+      <button class="ftag" data-f="perdido" onclick="setFCL('perdido')">🔴 Perdido</button>
+    </div>
+    <div id="cl-lista"><div class="empty"><span>⏳</span>Carregando...</div></div>
+  </div>
+</div>
+
+<!-- FINANCEIRO -->
+<div class="screen" id="s-financeiro">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Controle Financeiro</div><div class="mod-header-sub">Google Sheets sincronizado</div></div><div class="sync-badge s-load" id="fin-sync">⏳</div></div>
+  <div class="wrap">
+    <div style="display:flex;gap:7px;margin-bottom:10px;"><select class="field" style="flex:1;padding:9px 12px;margin:0;" id="fin-mes" onchange="carregarFIN()"><option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option></select><button class="btn-sync-sm" onclick="carregarFIN()">🔄</button></div>
+    <div class="grid2" id="fin-kpis-top" style="gap:8px;margin-bottom:8px;"></div>
+    <div class="grid3" id="fin-kpis-bot" style="gap:8px;margin-bottom:10px;"></div>
+    <div class="kcard" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:10px;font-weight:700;color:#8a9bb5;letter-spacing:1px;text-transform:uppercase;">🎯 Meta do mês</div><button style="background:transparent;border:1px solid #1e3060;border-radius:6px;padding:4px 9px;font-size:10px;color:#8a9bb5;cursor:pointer;" onclick="abrirMetaFIN()">✏️ Alterar</button></div>
+      <div class="prog-wrap"><div class="prog-bar" id="fin-prog" style="width:0%"></div></div>
+      <div class="meta-info" id="fin-meta-info"><span>Defina uma meta</span><span></span></div>
+    </div>
+    <div class="tabs"><button class="tab on" id="fin-tab-0" onclick="setTabFIN(0)">💰 Vendas</button><button class="tab" id="fin-tab-1" onclick="setTabFIN(1)">📤 Despesas</button></div>
+    <div id="fin-pane-0"><button class="btn-gold" onclick="abrirVendaFIN()" style="margin-bottom:10px;">+ Registrar Venda</button><div id="fin-vendas"></div></div>
+    <div id="fin-pane-1" style="display:none"><button class="btn-gold" onclick="abrirDespFIN()" style="margin-bottom:10px;">+ Registrar Despesa</button><div id="fin-despesas"></div></div>
+  </div>
+</div>
+
+<!-- MARKETING -->
+<div class="screen" id="s-marketing">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Kit de Marketing</div><div class="mod-header-sub">Legendas, Calendário e Scripts</div></div><span style="font-size:22px;">📱</span></div>
+  <div class="wrap">
+    <div class="tabs" style="margin-bottom:14px;"><button class="tab on" id="mkt-tab-0" onclick="setTabMKT(0)">✍️ Legendas</button><button class="tab" id="mkt-tab-1" onclick="setTabMKT(1)">📅 Calendário</button><button class="tab" id="mkt-tab-2" onclick="setTabMKT(2)">💬 Scripts</button></div>
+    <div id="mkt-pane-0">
+      <div class="sec-lbl">Tipo de post</div>
+      <div class="chips" id="mkt-chips-tipo"><button class="chip on" data-v="promo" onclick="tMKT(this,'tipo')">🔥 Promoção</button><button class="chip" data-v="pacote" onclick="tMKT(this,'tipo')">📦 Pacote</button><button class="chip" data-v="dica" onclick="tMKT(this,'tipo')">💡 Dica</button><button class="chip" data-v="inspi" onclick="tMKT(this,'tipo')">✨ Inspiração</button><button class="chip" data-v="destaque" onclick="tMKT(this,'tipo')">📍 Destino</button></div>
+      <div class="sec-lbl">Público</div>
+      <div class="chips" id="mkt-chips-pub"><button class="chip on" data-v="familia" onclick="tMKT(this,'pub')">👨‍👩‍👧 Família</button><button class="chip" data-v="casal" onclick="tMKT(this,'pub')">💑 Casal</button><button class="chip" data-v="geral" onclick="tMKT(this,'pub')">👥 Geral</button></div>
+      <div class="field"><label>Destino</label><input id="mkt-dest" type="text" placeholder="Ex: Fortaleza, Gramado..." /></div>
+      <div class="grid2"><div class="field"><label>Preço</label><input id="mkt-preco" type="text" placeholder="Ex: R$ 1.890" /></div><div class="field"><label>Parcelamento</label><input id="mkt-parc" type="text" placeholder="Ex: 10x" /></div></div>
+      <div class="field"><label>Destaque do pacote</label><input id="mkt-destaques" type="text" placeholder="Ex: Voo + hotel + café" /></div>
+      <div class="field"><label>Período</label><input id="mkt-periodo" type="text" placeholder="Ex: Julho" /></div>
+      <button class="btn-gold" onclick="gerarLegenda()">✦ GERAR LEGENDA</button>
+      <button class="btn-sec" onclick="gerarLegenda(true)">↻ Outra versão</button>
+      <div id="mkt-lg-out" style="display:none;margin-top:12px;"><div class="output-box" id="mkt-lg-txt"></div><div class="out-actions"><button class="btn-copy" onclick="copiarEl('mkt-lg-txt',this)">📋 Copiar</button><button class="btn-wpp" onclick="wppEl('mkt-lg-txt')">📲 WhatsApp</button></div></div>
+    </div>
+    <div id="mkt-pane-1" style="display:none">
+      <div class="field"><label>Mês</label><select id="mkt-cal-mes"><option>Janeiro</option><option>Fevereiro</option><option>Março</option><option>Abril</option><option>Maio</option><option>Junho</option><option selected>Julho</option><option>Agosto</option><option>Setembro</option><option>Outubro</option><option>Novembro</option><option>Dezembro</option></select></div>
+      <div class="field"><label>Destinos (separe por vírgula)</label><input id="mkt-cal-dest" type="text" placeholder="Ex: Fortaleza, Gramado, Buenos Aires" /></div>
+      <button class="btn-gold" onclick="gerarCal()">✦ GERAR CALENDÁRIO</button>
+      <div id="mkt-cal-out" style="display:none;margin-top:12px;"></div>
+    </div>
+    <div id="mkt-pane-2" style="display:none">
+      <div class="field"><label>Nome do cliente</label><input id="mkt-sc-nome" type="text" placeholder="Ex: Ana" oninput="renderScripts()" /></div>
+      <div class="field"><label>Destino</label><input id="mkt-sc-dest" type="text" placeholder="Ex: Fortaleza" oninput="renderScripts()" /></div>
+      <div id="mkt-scripts" style="margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULADORAS -->
+<div class="screen" id="s-calc">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Calculadoras</div><div class="mod-header-sub">InfinitePay e Meta Mensal</div></div><span style="font-size:22px;">🧮</span></div>
+  <div class="wrap">
+    <div class="tabs"><button class="tab on" id="calc-tab-0" onclick="setTabCALC(0)">💳 InfinitePay</button><button class="tab" id="calc-tab-1" onclick="setTabCALC(1)">🎯 Meta Mensal</button></div>
+    <div id="calc-pane-0">
+      <div class="sec-lbl">Canal</div>
+      <div class="chips" id="calc-chips-canal"><button class="chip on" data-v="maquininha" onclick="tCALC(this,'canal')">🖥️ Maquininha</button><button class="chip" data-v="link" onclick="tCALC(this,'canal')">🔗 Link Online</button></div>
+      <div class="sec-lbl">Modalidade</div>
+      <div class="chips" id="calc-chips-tipo"><button class="chip on" data-v="credito" onclick="tCALC(this,'tipo')">Crédito</button><button class="chip" data-v="debito" onclick="tCALC(this,'tipo')">Débito</button><button class="chip" data-v="pix" onclick="tCALC(this,'tipo')">Pix</button></div>
+      <div id="calc-parc-sec"><div class="sec-lbl">Parcelas</div><div class="parc-wrap" id="calc-parc-wrap"></div></div>
+      <div class="sec-lbl">Valor que você quer receber</div>
+      <div class="field"><label>R$</label><input id="calc-valor" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcIP()" /></div>
+      <div class="divl"></div>
+      <div id="calc-ip-res"><div class="empty"><span>🧮</span>Digite um valor acima</div></div>
+    </div>
+    <div id="calc-pane-1" style="display:none">
+      <div class="sec-lbl">Defina sua meta</div>
+      <div class="field"><label>Meta de comissão no mês (R$)</label><input id="meta-val" type="text" inputmode="numeric" placeholder="Ex: 3.000,00" oninput="fmtV(this);calcMeta()" /></div>
+      <div class="field"><label>Dias úteis no mês</label><input id="meta-dias" type="number" placeholder="22" value="22" oninput="calcMeta()" /></div>
+      <div class="field"><label>Ticket médio por venda (R$)</label><input id="meta-ticket" type="text" inputmode="numeric" placeholder="Ex: 500,00" oninput="fmtV(this);calcMeta()" /></div>
+      <div class="divl"></div>
+      <div id="meta-res"><div class="empty"><span>🎯</span>Preencha os campos acima</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FERRAMENTAS -->
+<div class="screen" id="s-ferramentas">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Ferramentas</div><div class="mod-header-sub">Checklist e Pacote Visual</div></div><span style="font-size:22px;">✈️</span></div>
+  <div class="wrap">
+    <div class="tabs"><button class="tab on" id="fer-tab-0" onclick="setTabFER(0)">☑️ Checklist</button><button class="tab" id="fer-tab-1" onclick="setTabFER(1)">🎨 Pacote Visual</button></div>
+    <div id="fer-pane-0">
+      <div class="field"><label>Nome do cliente</label><input id="ck-nome" type="text" placeholder="Ex: Ana e João" /></div>
+      <div class="grid2"><div class="field"><label>Destino</label><input id="ck-dest" type="text" placeholder="Ex: Cancún" /></div><div class="field"><label>Data ida</label><input id="ck-data" type="date" /></div></div>
+      <div class="sec-lbl">Tipo de viagem</div>
+      <div class="chips" id="ck-chips-tipo"><button class="chip on" data-v="nacional" onclick="tCK(this)">🇧🇷 Nacional</button><button class="chip" data-v="internacional" onclick="tCK(this)">🌎 Internacional</button></div>
+      <div class="sec-lbl">Incluso no pacote</div>
+      <div class="chips" id="ck-chips-inc"><button class="chip on" data-v="voo" onclick="mCK(this)">✈️ Voo</button><button class="chip on" data-v="hotel" onclick="mCK(this)">🏨 Hotel</button><button class="chip" data-v="transfer" onclick="mCK(this)">🚐 Transfer</button><button class="chip" data-v="carro" onclick="mCK(this)">🚗 Carro</button><button class="chip" data-v="seguro" onclick="mCK(this)">🛡️ Seguro</button></div>
+      <button class="btn-gold" onclick="gerarCK()">✦ GERAR CHECKLIST</button>
+      <div id="ck-output" style="display:none;margin-top:12px;">
+        <div class="out-tabs"><button class="otab on" id="ck-ot-0" onclick="setOTabCK(0)">☑️ Interativo</button><button class="otab" id="ck-ot-1" onclick="setOTabCK(1)">📲 Enviar</button></div>
+        <div id="ck-out-0"></div><div id="ck-out-1" style="display:none"></div>
+      </div>
+    </div>
+    <div id="fer-pane-1" style="display:none">
+      <div class="field"><label>Destino</label><input id="pv-dest" type="text" placeholder="Ex: Fortaleza, Cancún..." /></div>
+      <div class="grid2"><div class="field"><label>Duração</label><input id="pv-dur" type="text" placeholder="Ex: 5 dias / 4 noites" /></div><div class="field"><label>Período</label><input id="pv-periodo" type="text" placeholder="Ex: Julho" /></div></div>
+      <div class="sec-lbl">Público</div>
+      <div class="chips" id="pv-chips-pub"><button class="chip on" data-v="Família" onclick="tPV(this,'pub')">👨‍👩‍👧 Família</button><button class="chip" data-v="Casal" onclick="tPV(this,'pub')">💑 Casal</button><button class="chip" data-v="Individual" onclick="tPV(this,'pub')">👤 Individual</button></div>
+      <div class="sec-lbl">Incluso</div>
+      <div class="chips" id="pv-chips-inc"><button class="chip on" data-v="✈️ Passagem aérea" onclick="mPV(this)">✈️ Passagem</button><button class="chip on" data-v="🏨 Hotel" onclick="mPV(this)">🏨 Hotel</button><button class="chip" data-v="🚐 Transfer" onclick="mPV(this)">🚐 Transfer</button><button class="chip" data-v="🍳 Café da manhã" onclick="mPV(this)">🍳 Café</button><button class="chip" data-v="🛡️ Seguro viagem" onclick="mPV(this)">🛡️ Seguro</button><button class="chip" data-v="🎡 Passeios" onclick="mPV(this)">🎡 Passeios</button></div>
+      <div class="grid2"><div class="field"><label>Preço por pessoa</label><input id="pv-preco" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div><div class="field"><label>Parcelamento</label><input id="pv-parc" type="text" placeholder="Ex: 10x no cartão" /></div></div>
+      <div class="sec-lbl">Tema visual</div>
+      <div class="tema-grid"><button class="tema-btn on" data-t="t-praia" onclick="tTema(this)">🏖️<span>Praia</span></button><button class="tema-btn" data-t="t-montanha" onclick="tTema(this)">🏔️<span>Natureza</span></button><button class="tema-btn" data-t="t-cidade" onclick="tTema(this)">🌆<span>Cidade</span></button><button class="tema-btn" data-t="t-romance" onclick="tTema(this)">💑<span>Romance</span></button><button class="tema-btn" data-t="t-aventura" onclick="tTema(this)">🧗<span>Aventura</span></button><button class="tema-btn" data-t="t-luxo" onclick="tTema(this)">✨<span>Premium</span></button></div>
+      <button class="btn-gold" onclick="gerarPV()">✦ GERAR PACOTE</button>
+      <div id="pv-output" style="display:none;margin-top:12px;">
+        <div class="out-tabs"><button class="otab on" id="pv-ot-0" onclick="setOTabPV(0)">🎨 Card</button><button class="otab" id="pv-ot-1" onclick="setOTabPV(1)">📝 Canva</button><button class="otab" id="pv-ot-2" onclick="setOTabPV(2)">📲 WhatsApp</button></div>
+        <div id="pv-out-0"></div><div id="pv-out-1" style="display:none"></div><div id="pv-out-2" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRECIFICAÇÃO -->
+<div class="screen" id="s-precificacao">
+  <div class="mod-header"><button class="back-btn" onclick="voltar()">← Voltar</button><div class="mod-header-info"><div class="mod-header-title">Precificação</div><div class="mod-header-sub">Monte o preço com suas margens</div></div><span style="font-size:22px;">💼</span></div>
+  <div class="wrap">
+    <div style="background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.2);border-radius:10px;padding:11px 13px;font-size:11px;color:#e8b84b;margin-bottom:4px;">💡 Ajuste as margens — o preço final e sua comissão atualizam em tempo real.</div>
+    <div class="sec-lbl">🏨 Hotel / Hospedagem</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-hotel" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-hotel-pct-lbl">10</span>%</label><input id="pc-hotel-pct" type="range" min="0" max="30" value="10" oninput="document.getElementById('pc-hotel-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="sec-lbl">✈️ Passagem aérea</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-voo" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-voo-pct-lbl">5</span>%</label><input id="pc-voo-pct" type="range" min="0" max="20" value="5" oninput="document.getElementById('pc-voo-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="sec-lbl">🛫 Taxa de embarque</div>
+    <div class="field"><label>Valor (R$) — sem margem</label><input id="pc-embarque" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div>
+    <div class="sec-lbl">🚐 Transfer</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-transfer" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-transfer-pct-lbl">0</span>%</label><input id="pc-transfer-pct" type="range" min="0" max="30" value="0" oninput="document.getElementById('pc-transfer-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="sec-lbl">🚗 Aluguel de carro</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-carro" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-carro-pct-lbl">0</span>%</label><input id="pc-carro-pct" type="range" min="0" max="30" value="0" oninput="document.getElementById('pc-carro-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="sec-lbl">🎡 Passeios</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-passeios" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-passeios-pct-lbl">0</span>%</label><input id="pc-passeios-pct" type="range" min="0" max="30" value="0" oninput="document.getElementById('pc-passeios-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="sec-lbl">🛡️ Seguro viagem</div>
+    <div class="grid2"><div class="field"><label>Valor (R$)</label><input id="pc-seguro" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcPC()" /></div><div class="field"><label>Margem: <span id="pc-seguro-pct-lbl">15</span>%</label><input id="pc-seguro-pct" type="range" min="0" max="30" value="15" oninput="document.getElementById('pc-seguro-pct-lbl').textContent=this.value;calcPC()" style="width:100%;accent-color:#e8b84b;margin-top:6px;" /></div></div>
+    <div class="divl"></div>
+    <div id="pc-resultado"><div class="empty"><span>💼</span>Preencha os valores acima</div></div>
+    <button class="btn-sec" onclick="limparPC()" style="margin-top:8px;">🗑️ Limpar tudo</button>
+  </div>
+</div>
+
+<!-- MODAL CLIENTES -->
+<div class="overlay" id="ov-cl" onclick="fOv('ov-cl',event)"><div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="cl-modal-title">Novo Cliente</div>
+  <input type="hidden" id="cl-edit-id" />
+  <div class="mgrid2"><div class="mfield"><label>Nome</label><input id="cl-f-nome" type="text" /></div><div class="mfield"><label>WhatsApp</label><input id="cl-f-wpp" type="tel" /></div></div>
+  <div class="mgrid2"><div class="mfield"><label>Destino</label><input id="cl-f-dest" type="text" /></div><div class="mfield"><label>Público</label><select id="cl-f-pub"><option>Família</option><option>Casal</option><option>Individual</option><option>Grupo</option></select></div></div>
+  <div class="mgrid2"><div class="mfield"><label>Valor (R$)</label><input id="cl-f-valor" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div><div class="mfield"><label>Data viagem</label><input id="cl-f-data" type="date" /></div></div>
+  <div class="mgrid2"><div class="mfield"><label>Status</label><select id="cl-f-status"><option value="lead">🔵 Lead</option><option value="cotado">🟡 Cotado</option><option value="negociando">🟣 Negociando</option><option value="fechado">🟢 Fechado</option><option value="viajou">🩷 Viajou</option><option value="perdido">🔴 Perdido</option></select></div><div class="mfield"><label>Follow-up</label><input id="cl-f-fu" type="date" /></div></div>
+  <div class="mfield"><label>Observações</label><textarea id="cl-f-obs"></textarea></div>
+  <button class="btn-gold" id="cl-save-btn" onclick="salvarCL()">💾 Salvar</button>
+  <button class="btn-sec" onclick="fOv('ov-cl')">Cancelar</button>
+</div></div>
+
+<!-- MODAL VENDA -->
+<div class="overlay" id="ov-fin-v" onclick="fOv('ov-fin-v',event)"><div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title" id="fin-v-title">Registrar Venda</div>
+  <input type="hidden" id="fin-v-id" />
+  <div class="mfield"><label>Cliente / Destino</label><input id="fin-v-nome" type="text" placeholder="Ex: Ana — Fortaleza" /></div>
+  <div style="display:flex;gap:6px;margin-bottom:10px;">
+    <button class="tab on" id="fin-tipo-avulso" onclick="setTipoVenda('avulso')" style="flex:1;font-size:11px;">✈️ Venda Avulsa</button>
+    <button class="tab" id="fin-tipo-op" onclick="setTipoVenda('operadora')" style="flex:1;font-size:11px;">🏢 Operadora</button>
+  </div>
+  <div id="fin-campos-avulso">
+    <div style="background:rgba(96,180,255,.08);border:1px solid rgba(96,180,255,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:#60b4ff;margin-bottom:8px;">ℹ️ Comissão incide só sobre a passagem — não sobre a taxa de embarque.</div>
+    <div class="mgrid2"><div class="mfield"><label>Hotel (R$)</label><input id="fin-v-hotel" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div><div class="mfield"><label>Margem hotel</label><select id="fin-v-mh" onchange="calcComFIN()"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option></select></div></div>
+    <div class="mgrid2"><div class="mfield"><label>Passagem aérea (R$)</label><input id="fin-v-voo" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div><div class="mfield"><label>Margem passagem</label><select id="fin-v-mv" onchange="calcComFIN()"><option value="0">0%</option><option value="5" selected>5%</option><option value="10">10%</option></select></div></div>
+    <div class="mfield"><label>Taxa de embarque (R$) — sem comissão</label><input id="fin-v-embarque" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+    <div class="mgrid2"><div class="mfield"><label>Outros (R$)</label><input id="fin-v-out" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div><div class="mfield"><label>Margem outros</label><select id="fin-v-mo" onchange="calcComFIN()"><option value="0" selected>0%</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option></select></div></div>
+    <div class="mfield"><label>Seguro (R$) — margem fixa 15%</label><input id="fin-v-seg" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+  </div>
+  <div id="fin-campos-op" style="display:none;">
+    <div style="background:rgba(74,240,160,.08);border:1px solid rgba(74,240,160,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:#4af0a0;margin-bottom:8px;">ℹ️ Informe o valor total e sua comissão já embutida.</div>
+    <div class="mfield"><label>Valor total do pacote (R$)</label><input id="fin-v-total-op" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+    <div class="mfield"><label>Sua comissão (R$)</label><input id="fin-v-com-op" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this);calcComFIN()" /></div>
+  </div>
+  <div class="mfield"><label>Data fechamento</label><input id="fin-v-data" type="date" /></div>
+  <div class="preview-box" id="fin-v-prev">Preencha os valores</div>
+  <button class="btn-gold" id="fin-v-btn" onclick="salvarVendaFIN()">💾 Salvar Venda</button>
+  <button class="btn-sec" onclick="fOv('ov-fin-v')">Cancelar</button>
+</div></div>
+
+<!-- MODAL DESPESA -->
+<div class="overlay" id="ov-fin-d" onclick="fOv('ov-fin-d',event)"><div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title">Registrar Despesa</div>
+  <div class="mfield"><label>Descrição</label><input id="fin-d-nome" type="text" placeholder="Ex: Canva Pro, Google Ads..." /></div>
+  <div class="mgrid2"><div class="mfield"><label>Valor (R$)</label><input id="fin-d-val" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div><div class="mfield"><label>Categoria</label><select id="fin-d-cat"><option>📱 Marketing</option><option>🛠️ Ferramentas</option><option>📦 Operacional</option><option>💼 Outros</option></select></div></div>
+  <div class="mfield"><label>Data</label><input id="fin-d-data" type="date" /></div>
+  <button class="btn-gold" id="fin-d-btn" onclick="salvarDespFIN()">💾 Salvar</button>
+  <button class="btn-sec" onclick="fOv('ov-fin-d')">Cancelar</button>
+</div></div>
+
+<!-- MODAL META -->
+<div class="overlay" id="ov-fin-m" onclick="fOv('ov-fin-m',event)"><div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-title">🎯 Meta do Mês</div>
+  <div class="mfield"><label>Meta de comissão (R$)</label><input id="fin-m-val" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div>
+  <button class="btn-gold" onclick="salvarMetaFIN()">✅ Salvar Meta</button>
+  <button class="btn-sec" onclick="fOv('ov-fin-m')">Cancelar</button>
+</div></div>
+
+<!-- HOTÉIS -->
+<div class="screen" id="s-hoteis">
+  <div class="mod-header">
+    <button class="back-btn" onclick="voltar()">← Voltar</button>
+    <div class="mod-header-info">
+      <div class="mod-header-title">Banco de Hotéis</div>
+      <div class="mod-header-sub">Google Sheets sincronizado</div>
+    </div>
+    <div class="sync-badge s-load" id="ht-sync">⏳</div>
+  </div>
+  <div class="wrap">
+    <div class="top-bar">
+      <div class="search-wrap">
+        <span>🔍</span>
+        <input id="ht-busca" type="text" placeholder="Buscar por cidade..." oninput="renderHT()" />
+      </div>
+      <button class="btn-sync-sm" onclick="carregarHT()">🔄</button>
+      <button class="btn-add" onclick="abrirModalHT()">+ Adicionar</button>
+    </div>
+    <div id="ht-lista"><div class="empty"><span>⏳</span>Carregando...</div></div>
+  </div>
+</div>
+
+<!-- MODAL HOTEL -->
+<div class="overlay" id="ov-ht" onclick="fOv('ov-ht',event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="ht-modal-title">Adicionar Hotel</div>
+    <input type="hidden" id="ht-edit-id" />
+    <div class="mfield"><label>Nome do hotel</label><input id="ht-f-nome" type="text" placeholder="Ex: Ocean Palace" /></div>
+    <div class="mgrid2">
+      <div class="mfield"><label>Cidade</label><input id="ht-f-cidade" type="text" placeholder="Ex: Natal" /></div>
+      <div class="mfield"><label>Estado</label><input id="ht-f-estado" type="text" placeholder="Ex: RN" /></div>
+    </div>
+    <div class="mgrid2">
+      <div class="mfield"><label>Categoria (estrelas)</label>
+        <select id="ht-f-estrelas">
+          <option value="1">⭐ 1 estrela</option>
+          <option value="2">⭐⭐ 2 estrelas</option>
+          <option value="3" selected>⭐⭐⭐ 3 estrelas</option>
+          <option value="4">⭐⭐⭐⭐ 4 estrelas</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5 estrelas</option>
+        </select>
+      </div>
+      <div class="mfield"><label>Público ideal</label>
+        <select id="ht-f-publico">
+          <option value="Todos">👥 Todos</option>
+          <option value="Familia">👨‍👩‍👧 Família</option>
+          <option value="Casal">💑 Casal</option>
+        </select>
+      </div>
+    </div>
+    <div class="mgrid2">
+      <div class="mfield"><label>🔍 Nota Google (0-5)</label><input id="ht-f-google" type="number" step="0.1" min="0" max="5" placeholder="Ex: 4.5" oninput="calcMediaHT()" /></div>
+      <div class="mfield"><label>🏢 Nota Booking (0-10)</label><input id="ht-f-booking" type="number" step="0.1" min="0" max="10" placeholder="Ex: 8.5" oninput="calcMediaHT()" /></div>
+    </div>
+    <div id="ht-media-preview" style="text-align:center;font-size:12px;color:#e8b84b;font-weight:700;margin-bottom:6px;"></div>
+    <div class="mfield"><label>Regime de alimentação</label>
+      <select id="ht-f-regime">
+        <option value="">Não informado</option>
+        <option value="Sem alimentação">Sem alimentação</option>
+        <option value="Café da manhã">Café da manhã</option>
+        <option value="Meia pensão">Meia pensão</option>
+        <option value="Pensão completa">Pensão completa</option>
+        <option value="All Inclusive">All Inclusive</option>
+      </select>
+    </div>
+    <div class="mgrid2">
+      <div class="mfield"><label>Diária baixa temp. (R$)</label><input id="ht-f-baixa" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div>
+      <div class="mfield"><label>Diária alta temp. (R$)</label><input id="ht-f-alta" type="text" inputmode="numeric" placeholder="0,00" oninput="fmtV(this)" /></div>
+    </div>
+    <div class="mfield"><label>Observações</label><textarea id="ht-f-obs" placeholder="Ex: Vista para o mar, bom para família, piscina excelente..."></textarea></div>
+    <div class="mfield"><label>Link do hotel (opcional)</label><input id="ht-f-link" type="url" placeholder="https://..." /></div>
+    <button class="btn-gold" id="ht-save-btn" onclick="salvarHT()">💾 Salvar Hotel</button>
+    <button class="btn-sec" onclick="fOv('ov-ht')">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="app-part1.js"></script>
+<script src="app-part2.js"></script>
+
+<!-- FUNÇÕES DOS NOVOS CARDS -->
+<script>
+  const FORM_URL = 'https://araujoalef.github.io/primeway/cotacao.html';
+  const LEADS_URL = 'https://docs.google.com/spreadsheets/d/1xoQ6fli03QkYZh-6vwYBrqHRpAiYeDbc7vOy8-LmqBw/edit';
+
+  function abrirLeads() {
+    window.location.href = 'leads.html';
+  }
+
+  function copiarFormLink() {
+    navigator.clipboard.writeText(FORM_URL).then(() => {
+      mostrarToast('🔗 Link copiado!');
+    }).catch(() => {
+      mostrarToast('❌ Erro ao copiar');
+    });
+  }
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
